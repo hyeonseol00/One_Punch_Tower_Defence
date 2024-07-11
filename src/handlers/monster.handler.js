@@ -5,8 +5,7 @@ async function monsterLevelUp(userData) {
   const { monster, commonData } = getGameAssets();
 
   userData.monster_level++;
-  userData.monster_spawn_interval =
-    monster[userData.monster_level - 1].spawn_interval;
+  userData.monster_spawn_interval = monster[userData.monster_level - 1].spawn_interval;
   userData.gold += commonData.tower_cost;
 
   await updateUserData(userData);
@@ -19,6 +18,14 @@ async function monsterLevelUp(userData) {
   };
 }
 
+export const spawnMonsterHandler = async (userId, payload, socket) => {
+  socket.to('gameSession').emit('opponentMonsterSpawn', {
+    status: 'success',
+    message: '상대 몬스터가 스폰되었습니다.',
+    data: { monsterNumber: payload.monsterNumber },
+  });
+};
+
 export const killMonsterHandler = async (userId, payload) => {
   const { monster } = getGameAssets();
   const userData = await getUserData(userId);
@@ -28,10 +35,7 @@ export const killMonsterHandler = async (userId, payload) => {
 
   userData.score += 100;
 
-  if (
-    userData.monster_level < monster.length &&
-    userData.monster_level <= userData.score / 2000
-  ) {
+  if (userData.monster_level < monster.length && userData.monster_level <= userData.score / 2000) {
     return await monsterLevelUp(userData);
   }
 
@@ -55,16 +59,12 @@ export const killTreasureGoblinHandler = async (userId, payload) => {
   userData.score += 300;
   userData.gold += commonData.tower_cost * 2;
 
-  if (
-    userData.monster_level < monster.length &&
-    userData.monster_level <= userData.score / 2000
-  ) {
+  if (userData.monster_level < monster.length && userData.monster_level <= userData.score / 2000) {
     response = await monsterLevelUp(userData);
   }
 
   if (response) {
-    response.message =
-      '보물 고블린을 처치했습니다! 특별 보상을 받으며 몬스터가 강해집니다!';
+    response.message = '보물 고블린을 처치했습니다! 특별 보상을 받으며 몬스터가 강해집니다!';
   } else {
     response = {
       status: 'success',

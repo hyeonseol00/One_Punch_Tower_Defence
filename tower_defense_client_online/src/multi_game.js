@@ -168,6 +168,7 @@ function spawnMonster() {
   monsters.push(newMonster);
 
   // TODO. 서버로 몬스터 생성 이벤트 전송
+  sendEvent(101, { monsterNumber: newMonster.monsterNumber });
 }
 
 function gameLoop() {
@@ -307,6 +308,16 @@ Promise.all([
     }, 300);
   });
 
+  serverSocket.on('opponentMonsterSpawn', (data) => {
+    const newOpponentMonster = new Monster(
+      monsterPath,
+      monsterImages,
+      monsterLevel,
+      data.monsterNumber,
+    );
+    opponentMonsters.push(newOpponentMonster);
+  });
+
   serverSocket.on('gameOver', (data) => {
     bgm.pause();
     const { isWin } = data;
@@ -329,6 +340,15 @@ Promise.all([
     }
   });
 });
+
+const sendEvent = (handlerId, payload) => {
+  serverSocket.emit('event', {
+    userId: getUserId(),
+    clientVersion: CLIENT_VERSION,
+    handlerId,
+    payload,
+  });
+};
 
 const buyTowerButton = document.createElement('button');
 buyTowerButton.textContent = '타워 구입';

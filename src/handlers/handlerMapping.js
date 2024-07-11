@@ -3,6 +3,7 @@ import { gameEnd, gameStart } from './game.handler.js';
 import {
   killMonsterHandler,
   killTreasureGoblinHandler,
+  spawnMonsterHandler,
 } from './monster.handler.js';
 import {
   placeInitialTowerHandler,
@@ -21,6 +22,7 @@ const handlerMappings = {
   25: refundTowerHandler,
   26: upgradeTowerHandler,
   27: killTreasureGoblinHandler,
+  101: spawnMonsterHandler,
 };
 
 export default handlerMappings;
