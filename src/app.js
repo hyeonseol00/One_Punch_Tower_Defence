@@ -22,10 +22,6 @@ app.use('/api', accountsRouter);
 app.use(errorHandlingMiddleware);
 initSocket(server);
 
-app.get('/', (req, res) => {
-  res.send('<h1>Hello World</h1>');
-});
-
 server.listen(PORT, async () => {
   console.log(`서버가 ${PORT}번 포트로 실행 성공했습니다.`);
 
