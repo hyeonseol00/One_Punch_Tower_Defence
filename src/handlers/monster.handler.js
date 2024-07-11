@@ -45,7 +45,7 @@ export const killMonsterHandler = async (userId, payload) => {
   socket.emit('monsterKill', {
     status: 'success',
     message: '몬스터를 죽였습니다.',
-    monster: payload.monsterIndex,
+    monsterIndex: payload.monsterIndex,
   });
 };
 
