@@ -145,17 +145,22 @@ function placeInitialTowers(initialTowerCoords, initialTowers, context) {
     const tower = new Tower(towerCoords.x, towerCoords.y);
     initialTowers.push(tower);
     tower.draw(context, towerImage);
+
+    sendEvent(21, { x, y });
   });
 }
 
 function placeNewTower() {
-  // 타워를 구입할 수 있는 자원이 있을 때 타워 구입 후 랜덤 배치
-  if (userGold < towerCost) {
-    alert("골드가 부족합니다.");
+  
+  const { x, y } = getRandomPositionNearPath(200);
+
+  if (userGold >= towerCost) {
+    sendEvent(22, { x, y, gold: userGold });
+  } else {
+    alert("골드가 부족합니다");
     return;
   }
 
-  const { x, y } = getRandomPositionNearPath(200);
   const tower = new Tower(x, y);
   towers.push(tower);
   tower.draw(ctx, towerImage);
@@ -358,3 +363,13 @@ buyTowerButton.style.display = "none";
 buyTowerButton.addEventListener("click", placeNewTower);
 
 document.body.appendChild(buyTowerButton);
+
+
+const sendEvent = (handlerId, payload) => {
+  serverSocket.emit('event', {
+    userId: getUserId(),
+    clientVersion: CLIENT_VERSION,
+    handlerId,
+    payload,
+  });
+};

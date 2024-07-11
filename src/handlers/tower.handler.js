@@ -10,6 +10,13 @@ export const placeInitialTowerHandler = async (userId, payload) => {
   userData.tower_isUpgrades.push(false);
   await updateUserData(userData);
 
+  // 다른 클라이언트에 데이터 전송
+  sendToOpponent(userId, {
+    handlerId: 21, 
+    payload: { x: payload.x, y: payload.y },
+  });
+
+
   return {
     status: 'success',
     message: '기본 타워 하나가 성공적으로 배치되었습니다.',
@@ -31,6 +38,12 @@ export const placeTowerHandler = async (userId, payload) => {
   userData.tower_isUpgrades.push(false);
   await updateUserData(userData);
 
+  // 다른 클라이언트에 데이터 전송
+  sendToOpponent(userId, {
+    handlerId: 22, // 예시: 타워 구매 핸들러 ID
+    payload: { x: payload.x, y: payload.y, gold: userData.gold },
+  });
+  
   return {
     status: 'success',
     message: '구매한 타워가 성공적으로 배치되었습니다.',
@@ -94,4 +107,12 @@ export const upgradeTowerHandler = async (userId, payload) => {
     data: userData,
     towerIdx: randIdx,
   };
+};
+
+const sendToOpponent = (userId, eventData) => {
+  serverSocket.emit('updateEvent', {
+    userId: userId,
+    handlerId: eventData.handlerId,
+    payload: eventData.payload,
+  });
 };

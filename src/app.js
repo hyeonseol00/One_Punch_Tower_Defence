@@ -15,7 +15,7 @@ const server = createServer(app);
 
 const PORT = 3000;
 
-app.use(express.static('tower_defense_client'));
+app.use(express.static('tower_defense_client_online'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use('/api', accountsRouter);
