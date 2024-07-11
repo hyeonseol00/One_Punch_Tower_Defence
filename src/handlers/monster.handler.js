@@ -1,3 +1,4 @@
+import { plugin } from 'mongoose';
 import { getGameAssets } from '../init/assets.js';
 import { getUserData, updateUserData } from '../models/user-data.model.js';
 
@@ -41,11 +42,11 @@ export const killMonsterHandler = async (userId, payload) => {
 
   await updateUserData(userData);
 
-  return {
+  socket.emit('monsterKill', {
     status: 'success',
-    message: '몬스터를 처치했습니다!',
-    data: userData,
-  };
+    message: '몬스터를 죽였습니다.',
+    monster: payload.monsterNumber,
+  });
 };
 
 export const killTreasureGoblinHandler = async (userId, payload) => {
