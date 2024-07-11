@@ -5,6 +5,7 @@ import {
   killTreasureGoblinHandler,
   spawnMonsterHandler,
 } from './monster.handler.js';
+import { towerAttackHandler } from './tower-attack.handler.js';
 import {
   placeInitialTowerHandler,
   placeTowerHandler,
@@ -23,6 +24,7 @@ const handlerMappings = {
   26: upgradeTowerHandler,
   27: killTreasureGoblinHandler,
   101: spawnMonsterHandler,
+  102: towerAttackHandler,
 };
 
 export default handlerMappings;
