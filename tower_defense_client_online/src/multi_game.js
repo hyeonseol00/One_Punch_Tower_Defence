@@ -213,11 +213,11 @@ function gameLoop() {
         attackedSound.volume = 0.3;
         attackedSound.play();
         // TODO. 몬스터가 기지를 공격했을 때 서버로 이벤트 전송
-        sendEvent(23, { monsterNumber: monster.monsterNumber, score });
+        sendEvent(23, { monsterIndex: i, score });
       }
     } else {
       // TODO. 몬스터 사망 이벤트 전송
-      sendEvent(23, { monsterNumber: monster.monsterNumber, score });
+      sendEvent(23, { monsterIndex: i, score });
     }
   }
 
@@ -323,9 +323,7 @@ Promise.all([
   });
 
   serverSocket.on('monsterKill', (data) => {
-    const index = monsters.findIndex(
-      (monster) => monster.monsterNumber === data.monster.monsterNumber,
-    );
+    const index = data.monsterIndex;
     monsters.splice(index, 1);
   });
 
