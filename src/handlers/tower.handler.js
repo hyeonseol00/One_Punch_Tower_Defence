@@ -12,7 +12,7 @@ export const placeInitialTowerHandler = async (userId, payload) => {
 
   // 다른 클라이언트에 데이터 전송
   sendToOpponent(userId, {
-    handlerId: 21, 
+    handlerId: 21, //상대의 초기 타워 위치
     payload: { x: payload.x, y: payload.y },
   });
 
@@ -40,7 +40,7 @@ export const placeTowerHandler = async (userId, payload) => {
 
   // 다른 클라이언트에 데이터 전송
   sendToOpponent(userId, {
-    handlerId: 22, // 예시: 타워 구매 핸들러 ID
+    handlerId: 22, //상대가 타워 설치한 위치
     payload: { x: payload.x, y: payload.y, gold: userData.gold },
   });
   
