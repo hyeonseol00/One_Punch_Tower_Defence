@@ -110,7 +110,7 @@ export const upgradeTowerHandler = async (userId, payload) => {
 };
 
 const sendToOpponent = (userId, eventData) => {
-  serverSocket.emit('updateEvent', {
+  serverSocket.emit('updateOpponent', {
     userId: userId,
     handlerId: eventData.handlerId,
     payload: eventData.payload,
