@@ -371,15 +371,6 @@ buyTowerButton.addEventListener('click', placeNewTower);
 
 document.body.appendChild(buyTowerButton);
 
-//sendEvent 함수
-const sendEvent = (handlerId, payload) => {
-  serverSocket.emit('event', {
-    userId: getUserId(),
-    clientVersion: CLIENT_VERSION,
-    handlerId,
-    payload,
-  });
-};
 
 //상대 타워 좌표 받아오기
 serverSocket.on('updateOpponent', (data) => {

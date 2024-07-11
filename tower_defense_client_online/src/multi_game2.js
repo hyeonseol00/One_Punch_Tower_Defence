@@ -347,14 +347,6 @@ Promise.all([
   });
 });
 
-const sendEvent = (handlerId, payload) => {
-  serverSocket.emit('event', {
-    userId: getUserId(),
-    clientVersion: CLIENT_VERSION,
-    handlerId,
-    payload,
-  });
-};
 
 const buyTowerButton = document.createElement('button');
 buyTowerButton.textContent = '타워 구입';
