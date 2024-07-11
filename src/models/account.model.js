@@ -1,13 +1,16 @@
-import accountsSchema from '../mongodb/schemas/account.schema.js';
+import { prisma } from '../utils/prisma/index.js';
 
 export const addAccount = async (account) => {
-  const targetAccount = new accountsSchema(account);
-
-  await targetAccount.save();
+  await prisma.accounts.create({
+    data: {
+      id: account.id,
+      password: account.password,
+    },
+  });
 };
 
 export const getAccounts = async () => {
-  const accounts = await accountsSchema.find().exec();
+  const accounts = prisma.accounts.findMany({});
 
   return accounts;
 };
