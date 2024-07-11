@@ -280,7 +280,7 @@ Promise.all([
 ]).then(() => {
   serverSocket = io("http://15.165.15.118:3000", {
     auth: {
-      token: localStorage.getItem("token"),
+      token: localStorage.getItem("token1"),
     },
   });
 
@@ -293,6 +293,8 @@ Promise.all([
 
   serverSocket.on("connect", () => {
     // TODO. 서버와 연결되면 대결 대기열 큐 진입
+    sendEvent(102, token);
+    
   });
 
   serverSocket.on("matchFound", (data) => {

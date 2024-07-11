@@ -8,6 +8,7 @@ import {
 import { getGameAssets } from '../init/assets.js';
 import cookieParser from 'cookie-parser';
 import authMiddleware from '../middlewares/auth.middleware.js';
+import { gameMatch } from './game.handler.js';
 
 const registerHandler = (io) => {
   io.use((socket, next) => {
@@ -20,7 +21,8 @@ const registerHandler = (io) => {
       const userData = await getUserData(userID);
 
       if (!userID) return;
-
+      //여기
+      gameMatch(socket, userID);
       await addUser({ uuid: userID, socket_id: socket.id });
       if (!userData)
         await addUserData({
