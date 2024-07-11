@@ -318,6 +318,10 @@ Promise.all([
     opponentMonsters.push(newOpponentMonster);
   });
 
+  serverSocket.on('opponentTowerAttack', (data) => {
+    opponentTowers[data.towerIdx].attack(opponentMonsters[data.monsterIdx]);
+  });
+
   serverSocket.on('gameOver', (data) => {
     bgm.pause();
     const { isWin } = data;
