@@ -18,8 +18,6 @@ const registerHandler = (io) => {
 
       if (!userID) return;
 
-      gameMatch(userID, io);
-
       await addUser({ uuid: userID, socket_id: socket.id });
       if (!userData)
         await addUserData({
@@ -45,6 +43,8 @@ const registerHandler = (io) => {
           hp: commonData.base_hp,
         });
       handleConnection(socket, userID);
+
+      await gameMatch(userID, io);
 
       socket.on('event', (data) => handleEvent(io, socket, data));
       socket.on('disconnect', () => handleDisconnect(socket, userID));
