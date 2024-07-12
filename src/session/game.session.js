@@ -1,7 +1,9 @@
 import { gameSessions } from './session.js';
 
-export const addQue = (id) => {
-  const user = { id };
-
+export const addQueue = (user) => {
   gameSessions.push(user);
 };
+
+export function getGameSession() {
+  return [...gameSessions];
+}

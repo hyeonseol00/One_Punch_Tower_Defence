@@ -1,19 +1,26 @@
+import User from '../classes/models/user.class.js';
 import { getGameAssets } from '../init/assets.js';
 import { getHighScore, updateHighScore } from '../models/high-score.model.js';
-import { getUserData, updateUserData } from '../models/user-data.model.js';
-import { addQue } from '../session/game.session.js';
+import { addUserData, getUserData, updateUserData } from '../models/user-data.model.js';
+import { addQueue, getGameSession } from '../session/game.session.js';
 import { gameSessions } from '../session/session.js';
 
 export const gameStart = (userId, payload) => {
   return { status: 'success', message: '게임이 정상적으로 실행되었습니다.' };
 };
-export const gameMatch = async (userId, io) => {
-  console.log(gameSessions.length);
 
-  addQue(userId);
+export const gameMatch = async (userId, io) => {
+  const userData = await getUserData(userId);
+  const { score, highScore } = userData;
+
+  const user = new User(userId, score, highScore);
+
+  addQueue(user);
+
+  const gameSession = getGameSession();
 
   if (gameSessions.length > 1) {
-    io.emit('matchFound');
+    io.emit('matchFound', gameSession);
   }
 };
 
