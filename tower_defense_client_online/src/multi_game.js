@@ -336,8 +336,8 @@ Promise.all([
     }, 300);
   });
 
-  serverSocket.on('baseHitted', (data) => {
-    base.changeHp(data.hp);
+  serverSocket.on('baseHitted', (response) => {
+    base.changeHp(response.data.hp);
     console.log(data);
   });
 
