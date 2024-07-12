@@ -49,9 +49,9 @@ router.post('/sign-in', async (req, res, next) => {
       process.env.TOKEN_SECRET_KEY,
     );
 
-    const cookie = res.cookie('authorization', `Bearer ${token}`);
+    res.cookie('authorization', `Bearer ${token}`);
 
-    return res.status(200).json({ message: '로그인 성공', cookie });
+    return res.status(200).json({ message: '로그인 성공' });
   } catch (error) {
     next(error);
   }

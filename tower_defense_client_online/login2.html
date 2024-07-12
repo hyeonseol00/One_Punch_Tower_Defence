@@ -73,7 +73,7 @@
       const result = await res.json();
 
       if (res.status === 200) {
-        localStorage.setItem('token2', result.cookie);
+        localStorage.setItem('token2', document.cookie.match('(^|;) ?' + 'authorization' + '=([^;]*)(;|$)')[2]);
         window.location.href = "index.html";
       } else {
         alert('로그인 실패');
