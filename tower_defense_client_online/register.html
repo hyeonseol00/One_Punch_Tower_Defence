@@ -62,11 +62,12 @@
         return;
       }
 
-      const res = await ("/api/sign-up", {
+      const res = await fetch("/api/sign-up", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: 'include',
         body: JSON.stringify({ username, password }),
       })
 
