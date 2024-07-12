@@ -17,13 +17,10 @@ export const handleConnection = async (socket, userUUID) => {
   console.log('현재 접속 중인 사용자:', await getUsers());
 
   const { monster, commonData } = getGameAssets();
-  const userData = await getUserData(userUUID);
 
   socket.emit('connection', {
-    uuid: userUUID,
-    monster: monster[0],
-    commonData,
-    userHighScore: userData.user_high_score,
+    towerCost: commonData.tower_cost,
+    monsterSpawnInterval: monster[0].spawn_interval,
   });
 };
 
@@ -46,21 +43,4 @@ export const handleEvent = async (io, socket, data) => {
   }
 
   const response = await handler(data.userId, data.payload, socket);
-  if (response.broadcast) {
-    io.emit('response', response.broadcast);
-  }
-
-  if (response.refundTower) {
-    socket.emit('refundTower', response);
-    return;
-  }
-
-  if (response.towerIdx || response.towerIdx === 0) {
-    socket.emit('upgradeTower', response);
-    return;
-  }
-
-  if (response.data) {
-    socket.emit('dataSync', response);
-  }
 };
