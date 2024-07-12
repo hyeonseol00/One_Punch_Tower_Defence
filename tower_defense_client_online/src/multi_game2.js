@@ -2,6 +2,8 @@ import { Base } from './base.js';
 import { Monster } from './monster.js';
 import { Tower } from './tower.js';
 
+const CLIENT_VERSION = '1.0.0';
+
 if (!localStorage.getItem('token2')) {
   alert('로그인이 필요합니다.');
   location.href = '/login';
@@ -145,7 +147,7 @@ function placeInitialTowers(initialTowerCoords, initialTowers, context) {
 function placeNewTower() {
   // 타워를 구입할 수 있는 자원이 있을 때 타워 구입 후 랜덤 배치
   if (userGold < towerCost) {
-    alert('골드가 부족합니다.');
+    console.log('골드가 부족합니다.');
     return;
   }
 
@@ -211,6 +213,7 @@ function gameLoop() {
     const monster = monsters[i];
     if (monster.hp > 0) {
       const Attacked = monster.move();
+      monster.draw(ctx);
       if (Attacked) {
         const attackedSound = new Audio('sounds/attacked.wav');
         attackedSound.volume = 0.3;
@@ -223,6 +226,7 @@ function gameLoop() {
     } else {
       // TODO. 몬스터 사망 이벤트 전송
       sendEvent(23, { monsterIndex: i, score });
+      monsters.splice(i, 1);
     }
   }
 
@@ -282,8 +286,10 @@ Promise.all([
     }
   });
 
-  serverSocket.on('connect', () => {
+  serverSocket.on('connection', (data) => {
     // TODO. 서버와 연결되면 대결 대기열 큐 진입
+    towerCost = data.towerCost;
+    monsterSpawnInterval = data.monsterSpawnInterval;
   });
 
   serverSocket.on('matchFound', (data) => {
@@ -307,6 +313,23 @@ Promise.all([
 
         // TODO. 유저 및 상대방 유저 데이터 초기화
         if (!isInitGame) {
+          const userId = localStorage.getItem('userId');
+          const userData = data.find((ele) => ele.id == userId);
+          const opponentUserData = data.find((ele) => ele.id != userId);
+
+          userGold = userData.gold;
+          baseHp = userData.hp;
+          monsterLevel = userData.monsterLevel;
+          monsterPath = userData.monsterPath;
+          basePosition = userData.basePosition;
+          score = userData.score;
+          highScore = userData.highScore;
+          initialTowerCoords = userData.towerCoords;
+
+          opponentMonsterPath = opponentUserData.monsterPath;
+          opponentBasePosition = opponentUserData.basePosition;
+          opponentInitialTowerCoords = opponentUserData.towerCoords;
+
           initGame();
         }
       }
@@ -339,10 +362,6 @@ Promise.all([
     console.log(data);
   });
 
-  serverSocket.on('opponentTowerAttack', (data) => {
-    opponentTowers[data.towerIdx].attack(opponentMonsters[data.monsterIdx]);
-  });
-
   // 상대 타워 좌표 받아오기
   serverSocket.on('opponentInitialTowerPlaced', (data) => {
     const { x, y } = data;
@@ -358,8 +377,8 @@ Promise.all([
   });
 
   serverSocket.on('monsterKill', (data) => {
-    const index = data.monsterIndex;
-    monsters.splice(index, 1);
+    score = data.score;
+    console.log(data);
   });
 
   serverSocket.on('gameOver', (data) => {
@@ -387,7 +406,7 @@ Promise.all([
 
 const sendEvent = (handlerId, payload) => {
   serverSocket.emit('event', {
-    userId: getUserId(),
+    userId: localStorage.getItem('userId'),
     clientVersion: CLIENT_VERSION,
     handlerId,
     payload,
