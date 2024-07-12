@@ -212,11 +212,12 @@ function gameLoop() {
         attackedSound.volume = 0.3;
         attackedSound.play();
         // TODO. 몬스터가 기지를 공격했을 때 서버로 이벤트 전송
-        monsters.splice(i, 1);
+        sendEvent(23, { monsterIndex: i, score });
+        sendEvent(24, { hp: base.hp, damage: monster.attackPower });
       }
     } else {
       // TODO. 몬스터 사망 이벤트 전송
-      monsters.splice(i, 1);
+      sendEvent(23, { monsterIndex: i, score });
     }
   }
 
@@ -319,6 +320,11 @@ Promise.all([
 
   serverSocket.on('opponentTowerAttack', (data) => {
     opponentTowers[data.towerIdx].attack(opponentMonsters[data.monsterIdx]);
+  });
+
+  serverSocket.on('monsterKill', (data) => {
+    const index = data.monsterIndex;
+    monsters.splice(index, 1);
   });
 
   serverSocket.on('gameOver', (data) => {
