@@ -216,6 +216,7 @@ function gameLoop() {
         attackedSound.volume = 0.3;
         attackedSound.play();
         // TODO. 몬스터가 기지를 공격했을 때 서버로 이벤트 전송
+        sendEvent(24, { hp: base.hp, damage: monster.attackPower });
         monsters.splice(i, 1);
       }
     } else {
@@ -311,6 +312,11 @@ Promise.all([
     }, 300);
   });
 
+  serverSocket.on('baseHitted', (data) => {
+    base.hp = data.hp;
+    console.log(data);
+  });
+
   serverSocket.on('opponentMonsterSpawn', (data) => {
     const newOpponentMonster = new Monster(
       monsterPath,
@@ -319,10 +325,17 @@ Promise.all([
       data.monsterNumber,
     );
     opponentMonsters.push(newOpponentMonster);
+    console.log(data);
   });
 
   serverSocket.on('opponentTowerAttack', (data) => {
     opponentTowers[data.towerIdx].attack(opponentMonsters[data.monsterIdx]);
+    console.log(data);
+  });
+
+  serverSocket.on('opponentBaseHitted', (data) => {
+    opponentBase.hp = data.opponentHp;
+    console.log(data);
   });
 
   // 상대 타워 좌표 받아오기
