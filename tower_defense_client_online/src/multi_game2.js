@@ -138,24 +138,21 @@ function placeInitialTowers(initialTowerCoords, initialTowers, context) {
     initialTowers.push(tower);
     tower.draw(context, towerImage);
 
-    sendEvent(21, {tower}); //처음 타워 좌표 x,y 서버로 보내기
+    sendEvent(21, { x: tower.x, y: tower.y }); // 처음 타워 좌표 x,y 서버로 보내기
   });
 }
 
 function placeNewTower() {
-  
-  const { x, y } = getRandomPositionNearPath(200);
-
-  if (userGold >= towerCost) {
-    sendEvent(22, { x, y, gold: userGold });
-  } else {
-    alert("골드가 부족합니다");
+  // 타워를 구입할 수 있는 자원이 있을 때 타워 구입 후 랜덤 배치
+  if (userGold < towerCost) {
+    alert('골드가 부족합니다.');
     return;
   }
 
+  const { x, y } = getRandomPositionNearPath(200);
   const tower = new Tower(x, y);
   towers.push(tower);
-  sendEvent(22, {x,y}); //타워 생성 후 좌표 보내기
+  sendEvent(22, { x, y, userGold }); //타워 생성 후 좌표 보내기
   tower.draw(ctx, towerImage);
 }
 
@@ -324,6 +321,24 @@ Promise.all([
     opponentMonsters.push(newOpponentMonster);
   });
 
+  serverSocket.on('opponentTowerAttack', (data) => {
+    opponentTowers[data.towerIdx].attack(opponentMonsters[data.monsterIdx]);
+  });
+
+  // 상대 타워 좌표 받아오기
+  serverSocket.on('opponentInitialTowerPlaced', (data) => {
+    const { x, y } = data;
+    placeTowerFromOpponent(x, y);
+    console.log(data);
+  });
+
+  serverSocket.on('opponentTowerPlaced', (data) => {
+    const { x, y, gold } = data;
+    userGold = gold; // 서버에서 받은 골드 업데이트
+    placeTowerFromOpponent(x, y);
+    console.log(data);
+  });
+
   serverSocket.on('gameOver', (data) => {
     bgm.pause();
     const { isWin } = data;
@@ -347,6 +362,21 @@ Promise.all([
   });
 });
 
+const sendEvent = (handlerId, payload) => {
+  serverSocket.emit('event', {
+    userId: getUserId(),
+    clientVersion: CLIENT_VERSION,
+    handlerId,
+    payload,
+  });
+};
+
+// 상대 타워 좌표 넣고 그리는 함수
+const placeTowerFromOpponent = (x, y) => {
+  const tower = new Tower(x, y);
+  opponentTowers.push(tower);
+  tower.draw(opponentCtx, towerImage);
+};
 
 const buyTowerButton = document.createElement('button');
 buyTowerButton.textContent = '타워 구입';
@@ -361,35 +391,3 @@ buyTowerButton.style.display = 'none';
 buyTowerButton.addEventListener('click', placeNewTower);
 
 document.body.appendChild(buyTowerButton);
-
-//sendEvent 함수
-const sendEvent = (handlerId, payload) => {
-  serverSocket.emit('event', {
-    userId: getUserId(),
-    clientVersion: CLIENT_VERSION,
-    handlerId,
-    payload,
-  });
-};
-
-//상대 타워 좌표 받아오기
-serverSocket.on('updateOpponent', (data) => {
-  const { handlerId, payload } = data;
-  if (handlerId === 21) {
-    const { x, y } = payload;
-    placeTowerFromOpponent(x, y);
-  } else if (handlerId === 22) {
-    const { x, y, gold } = payload;
-    userGold = gold; // 서버에서 받은 골드 업데이트
-    if (userGold >= towerCost) {
-      placeTowerFromOpponent(x, y);
-    }
-    }
-  });
-
-//상대 타워 좌표 넣고 그리는 함수
-const placeTowerFromOpponent = (x, y) => {
-  const tower = new Tower(x, y);
-  opponentTowers.push(tower);
-  tower.draw(opponentCtx, towerImage);
-  };
