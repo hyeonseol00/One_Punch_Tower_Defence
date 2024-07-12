@@ -13,11 +13,11 @@ export const baseUnderAttackHandler = async (userId, payload, socket) => {
   socket.emit('baseHitted', {
     status: 'success',
     message: '기지가 피격당했습니다!',
-    data: { hp: userData.hp },
+    hp: userData.hp,
   });
   socket.to('gameSesseion').emit('opponentBaseHitted', {
     status: 'success',
     message: '상대 기지가 피격당했습니다!',
-    data: { opponentHp: userData.hp },
+    opponentHp: userData.hp,
   });
 };
