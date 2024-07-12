@@ -137,6 +137,8 @@ function placeInitialTowers(initialTowerCoords, initialTowers, context) {
     const tower = new Tower(towerCoords.x, towerCoords.y);
     initialTowers.push(tower);
     tower.draw(context, towerImage);
+
+    sendEvent(21, { x: tower.x, y: tower.y }); // 처음 타워 좌표 x,y 서버로 보내기
   });
 }
 
@@ -150,6 +152,7 @@ function placeNewTower() {
   const { x, y } = getRandomPositionNearPath(200);
   const tower = new Tower(x, y);
   towers.push(tower);
+  sendEvent(22, { x, y, userGold }); //타워 생성 후 좌표 보내기
   tower.draw(ctx, towerImage);
 }
 
@@ -214,6 +217,8 @@ function gameLoop() {
         attackedSound.play();
         // TODO. 몬스터가 기지를 공격했을 때 서버로 이벤트 전송
         sendEvent(23, { monsterIndex: i, score });
+        sendEvent(24, { hp: base.hp, damage: monster.attackPower });
+        monsters.splice(i, 1);
       }
     } else {
       // TODO. 몬스터 사망 이벤트 전송
@@ -308,6 +313,11 @@ Promise.all([
     }, 300);
   });
 
+  serverSocket.on('baseHitted', (data) => {
+    base.hp = data.hp;
+    console.log(data);
+  });
+
   serverSocket.on('opponentMonsterSpawn', (data) => {
     const newOpponentMonster = new Monster(
       monsterPath,
@@ -316,10 +326,31 @@ Promise.all([
       data.monsterNumber,
     );
     opponentMonsters.push(newOpponentMonster);
+    console.log(data);
   });
 
   serverSocket.on('opponentTowerAttack', (data) => {
     opponentTowers[data.towerIdx].attack(opponentMonsters[data.monsterIdx]);
+    console.log(data);
+  });
+
+  serverSocket.on('opponentBaseHitted', (data) => {
+    opponentBase.hp = data.opponentHp;
+    console.log(data);
+  });
+
+  // 상대 타워 좌표 받아오기
+  serverSocket.on('opponentInitialTowerPlaced', (data) => {
+    const { x, y } = data;
+    placeTowerFromOpponent(x, y);
+    console.log(data);
+  });
+
+  serverSocket.on('opponentTowerPlaced', (data) => {
+    const { x, y, gold } = data;
+    userGold = gold; // 서버에서 받은 골드 업데이트
+    placeTowerFromOpponent(x, y);
+    console.log(data);
   });
 
   serverSocket.on('monsterKill', (data) => {
@@ -357,6 +388,13 @@ const sendEvent = (handlerId, payload) => {
     handlerId,
     payload,
   });
+};
+
+// 상대 타워 좌표 넣고 그리는 함수
+const placeTowerFromOpponent = (x, y) => {
+  const tower = new Tower(x, y);
+  opponentTowers.push(tower);
+  tower.draw(opponentCtx, towerImage);
 };
 
 const buyTowerButton = document.createElement('button');
