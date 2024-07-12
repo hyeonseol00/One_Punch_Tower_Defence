@@ -19,10 +19,13 @@ const registerHandler = (io) => {
       const { commonData, monster } = getGameAssets();
       const userID = socket.userId;
       const userData = await getUserData(userID);
-
+  
       if (!userID) return;
-      //여기
-      gameMatch(socket, userID);
+      //여기서 인원 체크
+      let gameReady= gameMatch(socket, userID);
+      if(gameReady === true){
+        io.emit('matchFound')
+      }
       await addUser({ uuid: userID, socket_id: socket.id });
       if (!userData)
         await addUserData({

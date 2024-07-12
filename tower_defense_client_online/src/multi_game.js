@@ -279,7 +279,7 @@ Promise.all([
 
   serverSocket.on('connect', () => {
     // TODO. 서버와 연결되면 대결 대기열 큐 진입
-    sendEvent(102, token);
+    sendEvent(201, token);
     
   });
 
