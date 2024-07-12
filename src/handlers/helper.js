@@ -63,6 +63,4 @@ export const handleEvent = async (io, socket, data) => {
   if (response.data) {
     socket.emit('dataSync', response);
   }
-
-  socket.emit('response', response);
 };

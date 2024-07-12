@@ -1,7 +1,7 @@
 import { getGameAssets } from '../init/assets.js';
 import { getUserData, updateUserData } from '../models/user-data.model.js';
 
-export const placeInitialTowerHandler = async (userId, payload) => {
+export const placeInitialTowerHandler = async (userId, payload, socket) => {
   const userData = await getUserData(userId);
   userData.tower_coordinates.push({
     x: payload.x,
@@ -11,16 +11,16 @@ export const placeInitialTowerHandler = async (userId, payload) => {
   await updateUserData(userData);
 
   // 다른 클라이언트에 데이터 전송
-  sendToOpponent(userId, {
-    handlerId: 21, //상대의 초기 타워 위치
-    payload: { x: payload.x, y: payload.y },
+  socket.to('gameSession').emit('opponentInitialTowerPlaced', {
+    status: 'success',
+    message: '상대 기본 타워 하나가 배치되었습니다.',
+    data: { x: payload.x, y: payload.y },
   });
 
-
-  return {
+  socket.emit('response', {
     status: 'success',
     message: '기본 타워 하나가 성공적으로 배치되었습니다.',
-  };
+  });
 };
 
 export const placeTowerHandler = async (userId, payload) => {
@@ -39,16 +39,17 @@ export const placeTowerHandler = async (userId, payload) => {
   await updateUserData(userData);
 
   // 다른 클라이언트에 데이터 전송
-  sendToOpponent(userId, {
-    handlerId: 22, //상대가 타워 설치한 위치
-    payload: { x: payload.x, y: payload.y, gold: userData.gold },
+  socket.to('gameSession').emit('opponentTowerPlaced', {
+    status: 'success',
+    message: '상대 기본 타워 하나가 배치되었습니다.',
+    data: { x: payload.x, y: payload.y, gold: userData.gold },
   });
-  
-  return {
+
+  socket.emit('dataSync', {
     status: 'success',
     message: '구매한 타워가 성공적으로 배치되었습니다.',
     data: userData,
-  };
+  });
 };
 
 export const refundTowerHandler = async (userId, payload) => {
@@ -107,12 +108,4 @@ export const upgradeTowerHandler = async (userId, payload) => {
     data: userData,
     towerIdx: randIdx,
   };
-};
-
-const sendToOpponent = (userId, eventData) => {
-  serverSocket.emit('updateOpponent', {
-    userId: userId,
-    handlerId: eventData.handlerId,
-    payload: eventData.payload,
-  });
 };
