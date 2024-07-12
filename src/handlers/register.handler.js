@@ -1,13 +1,10 @@
 import { addUser } from '../models/user.model.js';
 import { handleConnection, handleDisconnect, handleEvent } from './helper.js';
-import {
-  addUserData,
-  getUserData,
-  updateUserData,
-} from '../models/user-data.model.js';
+import { addUserData, getUserData, updateUserData } from '../models/user-data.model.js';
 import { getGameAssets } from '../init/assets.js';
 import cookieParser from 'cookie-parser';
 import authMiddleware from '../middlewares/auth.middleware.js';
+import { gameMatch } from './game.handler.js';
 
 const registerHandler = (io) => {
   io.use((socket, next) => {
@@ -20,6 +17,8 @@ const registerHandler = (io) => {
       const userData = await getUserData(userID);
 
       if (!userID) return;
+
+      gameMatch(userID, io);
 
       await addUser({ uuid: userID, socket_id: socket.id });
       if (!userData)
