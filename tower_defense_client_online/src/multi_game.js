@@ -378,7 +378,13 @@ Promise.all([
 
   serverSocket.on('monsterKill', (data) => {
     score = data.score;
+
     console.log(data);
+
+    if (data.monster) {
+      monsterLevel = data.monster.level;
+      monsterSpawnInterval = data.monster.spawn_interval;
+    }
   });
 
   serverSocket.on('gameOver', (data) => {
