@@ -2,11 +2,10 @@ import { Base } from './base.js';
 import { Monster } from './monster.js';
 import { Tower } from './tower.js';
 
-if (!localStorage.getItem('token')) {
+if (!localStorage.getItem('token1')) {
   alert('로그인이 필요합니다.');
   location.href = '/login';
 }
-
 let serverSocket;
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -264,7 +263,7 @@ Promise.all([
   new Promise((resolve) => (pathImage.onload = resolve)),
   ...monsterImages.map((img) => new Promise((resolve) => (img.onload = resolve))),
 ]).then(() => {
-  serverSocket = io('http://15.165.15.118:3000', {
+  serverSocket = io('http://localhost:3000', {
     auth: {
       token: localStorage.getItem("token1"),
     },
@@ -276,11 +275,9 @@ Promise.all([
       location.href = '/login';
     }
   });
-
+  
   serverSocket.on('connect', () => {
     // TODO. 서버와 연결되면 대결 대기열 큐 진입
-    sendEvent(201, token);
-    
   });
 
   serverSocket.on('matchFound', (data) => {

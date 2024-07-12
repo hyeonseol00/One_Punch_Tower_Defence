@@ -8,11 +8,11 @@ import { gameSessions } from '../session/sessions.js';
 export const gameStart = (userId, payload) => {
   return { status: 'success', message: '게임이 정상적으로 실행되었습니다.' };
 };
-export const gameMatch = async (userId, payload)=>{
-  addQue(socket, userId);
-  let gameReady = false;
-  if(gameSessions.length > 1){
-    gameReady = true;
+export const gameMatch = async (userId, io)=>{
+  console.log(gameSessions.length);
+  addQue(userId);
+  if(gameSessions.length>1){
+    io.emit('matchFound');
   }
 }
 
