@@ -6,17 +6,11 @@ import {
   spawnMonsterHandler,
 } from './monster.handler.js';
 import { towerAttackHandler } from './tower-attack.handler.js';
-import {
-  placeInitialTowerHandler,
-  placeTowerHandler,
-  refundTowerHandler,
-  upgradeTowerHandler,
-} from './tower.handler.js';
+import { placeTowerHandler, refundTowerHandler, upgradeTowerHandler } from './tower.handler.js';
 
 const handlerMappings = {
   2: gameStart,
   3: gameEnd,
-  21: placeInitialTowerHandler,
   22: placeTowerHandler,
   23: killMonsterHandler,
   24: baseUnderAttackHandler,
