@@ -33,7 +33,7 @@
 
 ## 📄 API 명세서
 
-### [API명세서]
+### [API명세서](https://industrious-lasagna-717.notion.site/Node-js-3b205edbb1294f6c92616ff9c68ba77e?pvs=4)
 
 ## 📃 와이어 프레임
 
