@@ -38,6 +38,7 @@ const monsters = []; // 유저 몬스터 목록
 const towers = []; // 유저 타워 목록
 let score = 0; // 게임 점수
 let highScore = 0; // 기존 최고 점수
+let myId; // 내 아이디
 
 // 상대 데이터
 let opponentBase; // 상대방 기지 객체
@@ -46,6 +47,7 @@ let opponentInitialTowerCoords; // 상대방 초기 타워 좌표
 let opponentBasePosition; // 상대방 기지 좌표
 const opponentMonsters = []; // 상대방 몬스터 목록
 const opponentTowers = []; // 상대방 타워 목록
+let opponentId; // 상대방 아이디
 
 let isInitGame = false;
 
@@ -325,10 +327,12 @@ Promise.all([
           score = userData.score;
           highScore = userData.highScore;
           initialTowerCoords = userData.towerCoords;
+          myId = userData.id;
 
           opponentMonsterPath = opponentUserData.monsterPath;
           opponentBasePosition = opponentUserData.basePosition;
           opponentInitialTowerCoords = opponentUserData.towerCoords;
+          opponentId = opponentUserData.id;
 
           initGame();
         }
@@ -400,9 +404,9 @@ Promise.all([
     console.log(response);
   });
 
-  serverSocket.on('gameOver', (data) => {
+  serverSocket.on('gameOver', (response) => {
     bgm.pause();
-    const { isWin } = data;
+    const { isWin } = response.data;
     const winSound = new Audio('sounds/win.wav');
     const loseSound = new Audio('sounds/lose.wav');
     winSound.volume = 0.3;
@@ -410,11 +414,11 @@ Promise.all([
     if (isWin) {
       winSound.play().then(() => {
         alert('당신이 게임에서 승리했습니다!');
-        // TODO. 게임 종료 이벤트 전송
         location.reload();
       });
     } else {
       loseSound.play().then(() => {
+        sendEvent(3, { myId: myId, opponentId: opponentId, score: score });
         alert('아쉽지만 대결에서 패배하셨습니다! 다음 대결에서는 꼭 이기세요!');
         // TODO. 게임 종료 이벤트 전송
         location.reload();

@@ -10,6 +10,14 @@ export const baseUnderAttackHandler = async (userId, payload, socket) => {
 
   await updateUserData(userData);
 
+  if (userData.hp < 0) {
+    return socket.emit('gameOver', {
+      status: 'success',
+      message: '당신이 졌습니다!',
+      data: { isWin: false },
+    });
+  }
+
   socket.emit('baseHitted', {
     status: 'success',
     message: '기지가 피격당했습니다!',
