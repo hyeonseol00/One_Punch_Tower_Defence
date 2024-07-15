@@ -17,18 +17,18 @@
         flex-direction: column;
       }
       .chatBox {
+        display: none;
         position: absolute; /* 부모 요소 기준 절대 위치 */
         bottom: 12%; /* 아래쪽으로 고정 */
         left: 12%; /* 왼쪽으로 고정 */
         width: 450px; /* 채팅 박스 너비 */
         height: 300px; /* 채팅 박스 높이 */
-        background-color: rgba(255, 255, 255, 0.8); /* 반투명 흰색 배경 */
+        background-color: rgba(255, 255, 255, 0.2); /* 반투명 흰색 배경 */
         border: 1px solid #ccc; /* 연한 회색 테두리 */
         padding: 10px; /* 내부 여백 */
         z-index: 1000; /* 다른 요소 위에 표시 */
       }
       .chatLog {
-        background-color: green;
         width: 92.275%;
         height: 90%;
         position: absolute; /* 부모 요소 기준 절대 위치 */
@@ -110,24 +110,17 @@
     <canvas id="gameCanvas" width="1500" height="680"></canvas>
     <canvas id="opponentCanvas" width="1500" height="680"></canvas>
 
-    <div class="chatBox">
+    <div id="chatBox" class="chatBox">
       <div>
         <input id="chatInput" class="chatInput" type="text" />
       </div>
-      <div class="chatLog"></div>
+      <div id="chatLog" class="chatLog"></div>
     </div>
 
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script type="module">
       document.getElementById('registerButton').addEventListener('click', () => {
         window.location.href = 'register.html';
-      });
-      const chatInput = document.getElementById('chatInput');
-      chatInput.addEventListener('keydown', function (event) {
-        if (event.key == 'Enter') {
-          chatInput.value = '';
-          message = chatInput.value;
-        }
       });
 
       document.getElementById('loginButton').addEventListener('click', () => {

@@ -72,7 +72,8 @@ for (let i = 1; i <= NUM_OF_MONSTERS; i++) {
 }
 
 let bgm;
-
+const chatBox = document.getElementById('chatBox');
+chatBox.style.display = 'block';
 const chatInput = document.getElementById('chatInput');
 
 chatInput.addEventListener('keydown', function (event) {
@@ -351,18 +352,13 @@ Promise.all([
   });
   serverSocket.on('messageReceived', (response) => {
     const { content } = response.data;
-    console.log('안녕메시지');
     if (content !== '') {
       const chatLog = document.getElementById('chatLog');
       const newMessage = document.createElement('p');
       newMessage.textContent = content;
-      //채팅로그의 스크롤을 아래로 이동
-      chatLog.scrollTop = chatLog.scrollHeight;
 
       chatLog.appendChild(newMessage);
     }
-    //메시지를 창에다가 보여짐
-    //<p> 생성
   });
 
   serverSocket.on('baseHitted', (response) => {
