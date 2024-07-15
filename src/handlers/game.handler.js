@@ -9,13 +9,14 @@ export const gameStart = (userId, payload) => {
   return { status: 'success', message: '게임이 정상적으로 실행되었습니다.' };
 };
 
-export const gameMatch = async (userId, io) => {
+export const gameMatch = async (userId, io, socket) => {
   const userData = await getUserData(userId);
-  const { score, highScore } = userData;
+  const { score, user_high_score: highScore } = userData;
 
   const user = new User(userId, score, highScore);
 
   addQueue(user);
+  socket.join('gameSession');
 
   const gameSession = getGameSession();
 
