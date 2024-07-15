@@ -376,14 +376,15 @@ Promise.all([
     console.log(data);
   });
 
-  serverSocket.on('monsterKill', (data) => {
-    score = data.score;
+  serverSocket.on('monsterKill', (response) => {
+    score = response.data.score;
 
-    console.log(data);
+    console.log(response);
 
-    if (data.monster) {
-      monsterLevel = data.monster.level;
-      monsterSpawnInterval = data.monster.spawn_interval;
+    if (response.data.monster) {
+      monsterLevel = response.data.monster.level;
+      monsterSpawnInterval = response.data.monster.spawn_interval;
+      userGold = response.data.gold;
     }
   });
 
