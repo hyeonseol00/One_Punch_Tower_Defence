@@ -4,8 +4,9 @@ import { getUserData } from '../models/user-data.model.js';
 import { getUsers, removeUser } from '../models/user.model.js';
 import handlerMappings from './handlerMapping.js';
 
-export const handleDisconnect = async (socket, uuid) => {
+export const handleDisconnect = async (socket, userID) => {
   await removeUser(socket.id);
+
   console.log(`사용자 접속 해제: ${socket.id}`);
   console.log('현재 접속 중인 사용자:', await getUsers());
 };
