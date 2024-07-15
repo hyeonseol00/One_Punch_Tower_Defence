@@ -1,10 +1,25 @@
 import { CLIENT_VERSION } from '../constants.js';
 import { getGameAssets } from '../init/assets.js';
+import { createHistory } from '../models/history.model.js';
 import { getUserData } from '../models/user-data.model.js';
 import { getUsers, removeUser } from '../models/user.model.js';
+import { gameSessions } from '../session/session.js';
 import handlerMappings from './handlerMapping.js';
 
 export const handleDisconnect = async (socket, userID) => {
+  const myUser = gameSessions.findIndex((user) => user.id === userID);
+  const opponentUser = gameSessions.findIndex((user) => user.id !== userID);
+
+  console.log('인덱스: ', myUser, opponentUser);
+
+  if (myUser !== -1 && opponentUser !== -1) {
+    createHistory(gameSessions[myUser].id, gameSessions[opponentUser].id);
+  }
+
+  gameSessions.splice(myUser, 1);
+
+  console.log(gameSessions);
+
   await removeUser(socket.id);
 
   console.log(`사용자 접속 해제: ${socket.id}`);
