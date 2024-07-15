@@ -139,8 +139,6 @@ function placeInitialTowers(initialTowerCoords, initialTowers, context) {
     const tower = new Tower(towerCoords.x, towerCoords.y);
     initialTowers.push(tower);
     tower.draw(context, towerImage);
-
-    if (context != opponentCtx) sendEvent(21, { x: tower.x, y: tower.y }); // 처음 타워 좌표 x,y 서버로 보내기
   });
 }
 
@@ -368,18 +366,15 @@ Promise.all([
     console.log(response);
   });
 
-  // 상대 타워 좌표 받아오기
-  serverSocket.on('opponentInitialTowerPlaced', (response) => {
+  serverSocket.on('towerPlaced', (response) => {
     const { data } = response;
-    const { x, y } = data;
-    placeTowerFromOpponent(x, y);
+    userGold = data.gold;
     console.log(response);
   });
 
   serverSocket.on('opponentTowerPlaced', (response) => {
     const { data } = response;
     const { x, y, gold } = data;
-    userGold = gold; // 서버에서 받은 골드 업데이트
     placeTowerFromOpponent(x, y);
     console.log(response);
   });
