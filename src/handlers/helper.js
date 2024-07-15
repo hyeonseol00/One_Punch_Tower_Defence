@@ -58,5 +58,5 @@ export const handleEvent = async (io, socket, data) => {
     return;
   }
 
-  const response = await handler(data.userId, data.payload, socket);
+  const response = await handler(data.userId, data.payload, socket, io);
 };
