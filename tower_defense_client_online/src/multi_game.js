@@ -71,6 +71,16 @@ for (let i = 1; i <= NUM_OF_MONSTERS; i++) {
 
 let bgm;
 
+const chatInput = document.getElementById('chatInput');
+
+chatInput.addEventListener('keydown', function (event) {
+  if (event.key == 'Enter') {
+    const message = chatInput.value;
+    chatInput.value = '';
+    sendEvent(50, { myId, message });
+  }
+});
+
 function initMap() {
   ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height); // 배경 이미지 그리기
   drawPath(monsterPath, ctx);
@@ -334,6 +344,21 @@ Promise.all([
         }
       }
     }, 300);
+  });
+  serverSocket.on('messageReceived', (response) => {
+    const { content } = response.data;
+    console.log('안녕메시지');
+    if (content !== '') {
+      const chatLog = document.getElementById('chatLog');
+      const newMessage = document.createElement('p');
+      newMessage.textContent = content;
+      //채팅로그의 스크롤을 아래로 이동
+      chatLog.scrollTop = chatLog.scrollHeight;
+
+      chatLog.appendChild(newMessage);
+    }
+    //메시지를 창에다가 보여짐
+    //<p> 생성
   });
 
   serverSocket.on('baseHitted', (response) => {

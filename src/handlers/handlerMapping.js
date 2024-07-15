@@ -1,4 +1,5 @@
 import { baseUnderAttackHandler } from './base.handler.js';
+import { receiveMessage } from './chat.handler.js';
 import { gameEnd, gameStart } from './game.handler.js';
 import {
   killMonsterHandler,
@@ -17,6 +18,7 @@ const handlerMappings = {
   25: refundTowerHandler,
   26: upgradeTowerHandler,
   27: killTreasureGoblinHandler,
+  50: receiveMessage,
   101: spawnMonsterHandler,
   102: towerAttackHandler,
 };
