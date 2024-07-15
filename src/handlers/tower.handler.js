@@ -41,7 +41,7 @@ export const placeTowerHandler = async (userId, payload) => {
   // 다른 클라이언트에 데이터 전송
   socket.to('gameSession').emit('opponentTowerPlaced', {
     status: 'success',
-    message: '상대 기본 타워 하나가 배치되었습니다.',
+    message: '상대가 타워 하나를 구매했습니다.',
     data: { x: payload.x, y: payload.y, gold: userData.gold },
   });
 

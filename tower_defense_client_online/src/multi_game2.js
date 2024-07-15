@@ -140,7 +140,7 @@ function placeInitialTowers(initialTowerCoords, initialTowers, context) {
     initialTowers.push(tower);
     tower.draw(context, towerImage);
 
-    sendEvent(21, { x: tower.x, y: tower.y }); // 처음 타워 좌표 x,y 서버로 보내기
+    if (context != opponentCtx) sendEvent(21, { x: tower.x, y: tower.y }); // 처음 타워 좌표 x,y 서버로 보내기
   });
 }
 
@@ -317,6 +317,8 @@ Promise.all([
           const userData = data.find((ele) => ele.id == userId);
           const opponentUserData = data.find((ele) => ele.id != userId);
 
+          console.log(userData, opponentUserData);
+
           userGold = userData.gold;
           baseHp = userData.hp;
           monsterLevel = userData.monsterLevel;
@@ -337,54 +339,70 @@ Promise.all([
   });
 
   serverSocket.on('baseHitted', (response) => {
-    base.changeHp(response.data.hp);
-    console.log(data);
+    const { data } = response;
+    base.changeHp(data.hp);
+    console.log(response);
   });
 
-  serverSocket.on('opponentMonsterSpawn', (data) => {
+  serverSocket.on('opponentMonsterSpawn', (response) => {
+    const { data } = response;
     const newOpponentMonster = new Monster(
-      monsterPath,
+      opponentMonsterPath,
       monsterImages,
       monsterLevel,
       data.monsterNumber,
     );
     opponentMonsters.push(newOpponentMonster);
-    console.log(data);
+    console.log(response);
   });
 
-  serverSocket.on('opponentTowerAttack', (data) => {
+  serverSocket.on('opponentTowerAttack', (response) => {
+    const { data } = response;
     opponentTowers[data.towerIdx].attack(opponentMonsters[data.monsterIdx]);
-    console.log(data);
+    // console.log(response);
   });
 
-  serverSocket.on('opponentBaseHitted', (data) => {
+  serverSocket.on('opponentBaseHitted', (response) => {
+    const { data } = response;
     opponentBase.hp = data.opponentHp;
-    console.log(data);
+    console.log(response);
   });
 
   // 상대 타워 좌표 받아오기
-  serverSocket.on('opponentInitialTowerPlaced', (data) => {
+  serverSocket.on('opponentInitialTowerPlaced', (response) => {
+    const { data } = response;
     const { x, y } = data;
     placeTowerFromOpponent(x, y);
-    console.log(data);
+    console.log(response);
   });
 
-  serverSocket.on('opponentTowerPlaced', (data) => {
+  serverSocket.on('opponentTowerPlaced', (response) => {
+    const { data } = response;
     const { x, y, gold } = data;
     userGold = gold; // 서버에서 받은 골드 업데이트
     placeTowerFromOpponent(x, y);
-    console.log(data);
+    console.log(response);
   });
 
-  serverSocket.on('monsterKill', (data) => {
+  serverSocket.on('monsterKill', (response) => {
+    const { data } = response;
     score = data.score;
-
-    console.log(data);
 
     if (data.monster) {
       monsterLevel = data.monster.level;
       monsterSpawnInterval = data.monster.spawn_interval;
+      userGold = data.gold;
     }
+
+    console.log(response);
+  });
+
+  serverSocket.on('opponentMonsterKill', (response) => {
+    const { data } = response;
+
+    opponentMonsters.splice(data.opponentMonsterIdx, 1);
+
+    console.log(response);
   });
 
   serverSocket.on('gameOver', (data) => {
@@ -407,6 +425,10 @@ Promise.all([
         location.reload();
       });
     }
+  });
+
+  serverSocket.on('response', (response) => {
+    console.log(response);
   });
 });
 

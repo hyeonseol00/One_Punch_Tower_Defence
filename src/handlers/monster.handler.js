@@ -14,8 +14,11 @@ async function monsterLevelUp(userData) {
   return {
     status: 'success',
     message: '몬스터를 처치했습니다, 몬스터가 강해집니다!',
-    score: userData.score,
-    data: { monster: monster[userData.monster_level - 1], gold: userData.gold },
+    data: {
+      score: userData.score,
+      monster: monster[userData.monster_level - 1],
+      gold: userData.gold,
+    },
   };
 }
 
@@ -36,13 +39,23 @@ export const killMonsterHandler = async (userId, payload, socket) => {
 
   userData.score += 100;
 
+  const sendToOppo = socket.to('gameSession').emit('opponentMonsterKill', {
+    status: 'success',
+    message: '상대가 몬스터를 죽였습니다.',
+    data: { opponentMonsterIdx: payload.monsterIndex },
+  });
+
   if (userData.monster_level < monster.length && userData.monster_level <= userData.score / 2000) {
     const response = await monsterLevelUp(userData);
+
+    sendToOppo;
     socket.emit('monsterKill', response);
+    return;
   }
 
   await updateUserData(userData);
 
+  sendToOppo;
   socket.emit('monsterKill', {
     status: 'success',
     message: '몬스터를 죽였습니다.',

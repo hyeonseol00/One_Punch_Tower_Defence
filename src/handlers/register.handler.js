@@ -44,7 +44,7 @@ const registerHandler = (io) => {
         });
       handleConnection(socket, userID);
 
-      await gameMatch(userID, io);
+      await gameMatch(userID, io, socket);
 
       socket.on('event', (data) => handleEvent(io, socket, data));
       socket.on('disconnect', () => handleDisconnect(socket, userID));
