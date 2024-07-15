@@ -41,7 +41,11 @@
 
 ## 📃 ERD Diagram
 
-### [ERD 사진]
+### **MySQL**
+![MySQL](https://github.com/user-attachments/assets/a02307f7-150a-4227-9284-44a26526eb86)
+
+### **MongoDB**
+![mongoDB](https://github.com/user-attachments/assets/01a93e48-9e87-49de-8ddc-96e19e8d6b94)
 
 ## ⚽ 프로젝트 주요 기능
 
