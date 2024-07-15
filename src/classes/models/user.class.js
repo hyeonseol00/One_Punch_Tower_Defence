@@ -8,7 +8,7 @@ class User {
     this.id = userId;
     this.gold = gameAssets.commonData.user_gold;
     this.hp = gameAssets.commonData.base_hp;
-    this.numOfInitialTowers = gameAssets.commonData.num_of_initial_towers;
+    this.numOfInitialTowers = 0;
     this.monsterLevel = 1;
     this.score = score;
     this.highScore = highScore;
