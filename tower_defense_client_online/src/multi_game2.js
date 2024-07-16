@@ -325,6 +325,7 @@ Promise.all([
         progressBar.style.display = 'none';
         buyTowerButton.style.display = 'block';
         upgradeTowerButton.style.display = 'block';
+        refundTowerButton.style.display = 'block';
         canvas.style.display = 'block';
         opponentCanvas.style.display = 'block';
 
@@ -356,6 +357,7 @@ Promise.all([
       }
     }, 300);
   });
+
   serverSocket.on('messageReceived', (response) => {
     const { content } = response.data;
     if (content !== '') {
@@ -450,6 +452,21 @@ Promise.all([
     console.log(response);
   });
 
+  serverSocket.on('refundTower', (response) => {
+    const { data } = response;
+
+    towers.pop();
+    userGold = data.gold;
+
+    console.log(response);
+  });
+
+  serverSocket.on('opponentRefundTower', (response) => {
+    opponentTowers.pop();
+
+    console.log(response);
+  });
+
   serverSocket.on('gameOver', (response) => {
     bgm.pause();
     const { isWin } = response.data;
@@ -494,6 +511,10 @@ const placeTowerFromOpponent = (x, y) => {
   tower.draw(opponentCtx, towerImage);
 };
 
+function refundLastTower() {
+  sendEvent(25, {});
+}
+
 function upgradeRandomTower() {
   sendEvent(26, {});
 }
@@ -511,6 +532,20 @@ buyTowerButton.style.display = 'none';
 buyTowerButton.addEventListener('click', placeNewTower);
 
 document.body.appendChild(buyTowerButton);
+
+const refundTowerButton = document.createElement('button');
+refundTowerButton.textContent = '타워 환불';
+refundTowerButton.style.position = 'absolute';
+refundTowerButton.style.top = '10px';
+refundTowerButton.style.right = '160px';
+refundTowerButton.style.padding = '10px 20px';
+refundTowerButton.style.fontSize = '16px';
+refundTowerButton.style.cursor = 'pointer';
+refundTowerButton.style.display = 'none';
+
+refundTowerButton.addEventListener('click', refundLastTower);
+
+document.body.appendChild(refundTowerButton);
 
 const upgradeTowerButton = document.createElement('button');
 upgradeTowerButton.textContent = '타워 업그레이드';
