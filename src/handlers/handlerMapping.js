@@ -9,14 +9,17 @@ import { placeTowerHandler, refundTowerHandler, upgradeTowerHandler } from './to
 const handlerMappings = {
   3: gameEnd,
   4: saveHistory,
-  22: placeTowerHandler,
-  23: killMonsterHandler,
-  24: baseUnderAttackHandler,
-  25: refundTowerHandler,
-  26: upgradeTowerHandler,
-  50: receiveMessage,
-  101: spawnMonsterHandler,
-  102: towerAttackHandler,
+
+  21: placeTowerHandler,
+  22: refundTowerHandler,
+  23: upgradeTowerHandler,
+  24: towerAttackHandler,
+
+  31: spawnMonsterHandler,
+  32: killMonsterHandler,
+  33: baseUnderAttackHandler,
+
+  101: receiveMessage,
 };
 
 export default handlerMappings;
