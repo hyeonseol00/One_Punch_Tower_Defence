@@ -25,7 +25,7 @@ const userDataSchema = new mongoose.Schema({
     type: Array,
     required: true,
   },
-  tower_isUpgrades: {
+  tower_is_upgrades: {
     type: Array,
     required: true,
   },
