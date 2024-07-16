@@ -50,6 +50,7 @@ const opponentTowers = []; // 상대방 타워 목록
 let opponentId; // 상대방 아이디
 
 let isInitGame = false;
+let isBuyMode = false; // 타워 구입 모드(기본off)
 
 // 이미지 로딩 파트
 const backgroundImage = new Image();
@@ -156,18 +157,32 @@ function placeInitialTowers(initialTowerCoords, initialTowers, context) {
 }
 
 function placeNewTower() {
-  // 타워를 구입할 수 있는 자원이 있을 때 타워 구입 후 랜덤 배치
-  if (userGold < towerCost) {
-    console.log('골드가 부족합니다.');
-    return;
-  }
-
-  const { x, y } = getRandomPositionNearPath(200);
-  const tower = new Tower(x, y);
-  towers.push(tower);
-  sendEvent(22, { x, y, userGold }); //타워 생성 후 좌표 보내기
-  tower.draw(ctx, towerImage);
+  isBuyMode = !isBuyMode;
 }
+
+canvas.addEventListener('click', (event) => {
+  const rect = canvas.getBoundingClientRect();
+  const clickX = event.clientX - rect.left;
+  const clickY = event.clientY - rect.top;
+  const refundRangeX = 35;
+  const refundRangeY = 75;
+
+  if (isBuyMode) {
+    if (userGold >= towerCost) {
+      const x = clickX - refundRangeX;
+      const y = clickY - refundRangeY;
+
+      const tower = new Tower(x, y);
+      towers.push(tower);
+      sendEvent(22, { x, y, userGold }); //타워 생성 후 좌표 보내기
+      tower.draw(ctx, towerImage);
+    } else {
+      console.log('골드가 부족합니다.');
+      return;
+    }
+    isBuyMode = false;
+  }
+});
 
 function placeBase(position, isPlayer) {
   if (isPlayer) {
