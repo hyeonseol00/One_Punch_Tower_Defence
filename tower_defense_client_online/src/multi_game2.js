@@ -78,7 +78,6 @@ for (let i = 1; i <= NUM_OF_MONSTERS; i++) {
   monsterImages.push(img);
 }
 
-let bgm;
 const chatBox = document.getElementById('chatBox');
 
 const chatInput = document.getElementById('chatInput');
@@ -326,14 +325,20 @@ function gameLoop() {
   requestAnimationFrame(gameLoop); // 지속적으로 다음 프레임에 gameLoop 함수 호출할 수 있도록 함
 }
 
+const songs = ['game-bgm1.mp3', 'game-bgm2.mp3', 'game-bgm3.mp3'];
+const song = new Audio();
+let currentMusic = Math.floor(Math.random() * songs.length);
+const songLen = songs.length;
+
+const songContainer = document.getElementById('song');
+songContainer.appendChild(song);
+
 function initGame() {
   if (isInitGame) {
     return;
   }
-  bgm = new Audio('sounds/bgm.mp3');
-  bgm.loop = true;
-  bgm.volume = 0.2;
-  bgm.play();
+
+  playSong(currentMusic);
 
   initMap(); // 맵 초기화 (배경, 몬스터 경로 그리기)
 
@@ -342,6 +347,24 @@ function initGame() {
   isInitGame = true;
   document.getElementById('chatBox').style.display = 'block';
 }
+
+function playSong(index) {
+  song.src = './sounds/' + songs[index];
+  song.controls = true;
+  song.autoplay = true;
+  song.volume = 0.3;
+  song.play();
+}
+
+song.addEventListener('ended', function playNext() {
+  currentMusic++;
+  if (currentMusic == songLen) {
+    currentMusic = 0;
+    playSong(currentMusic);
+  } else {
+    playSong(currentMusic);
+  }
+});
 
 // 이미지 로딩 완료 후 서버와 연결하고 게임 초기화
 Promise.all([
@@ -532,7 +555,7 @@ Promise.all([
   });
 
   serverSocket.on('gameOver', (response) => {
-    bgm.pause();
+    song.pause();
     const { isWin } = response.data;
     const winSound = new Audio('sounds/win.wav');
     const loseSound = new Audio('sounds/lose.wav');
