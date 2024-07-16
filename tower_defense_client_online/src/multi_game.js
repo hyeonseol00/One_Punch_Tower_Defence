@@ -51,6 +51,8 @@ let opponentId; // 상대방 아이디
 
 let isInitGame = false;
 let isBuyMode = false; // 타워 구입 모드(기본off)
+let isRefundMode = false;
+let isUpgradeMode = false;
 
 // 이미지 로딩 파트
 const backgroundImage = new Image();
@@ -160,7 +162,42 @@ function placeInitialTowers(initialTowerCoords, initialTowers, context) {
 }
 
 function placeNewTower() {
-  isBuyMode = !isBuyMode;
+  const tempIsBuyMode = !isBuyMode;
+
+  initControlModes();
+  isBuyMode = tempIsBuyMode;
+
+  if (isBuyMode) buyTowerButton.style.background = 'green';
+  else buyTowerButton.style.background = 'buttonface';
+}
+
+function refundTower() {
+  const tempIsRefundMode = !isRefundMode;
+
+  initControlModes();
+  isRefundMode = tempIsRefundMode;
+
+  if (isRefundMode) refundTowerButton.style.background = 'green';
+  else refundTowerButton.style.background = 'buttonface';
+}
+
+function upgradeTower() {
+  const tempIsUpgradeMode = !isUpgradeMode;
+
+  initControlModes();
+  isUpgradeMode = tempIsUpgradeMode;
+
+  if (isUpgradeMode) upgradeTowerButton.style.background = 'green';
+  else upgradeTowerButton.style.background = 'buttonface';
+}
+
+function initControlModes() {
+  isBuyMode = false;
+  isRefundMode = false;
+  isUpgradeMode = false;
+  buyTowerButton.style.background = 'buttonface';
+  refundTowerButton.style.background = 'buttonface';
+  upgradeTowerButton.style.background = 'buttonface';
 }
 
 canvas.addEventListener('click', (event) => {
@@ -169,6 +206,15 @@ canvas.addEventListener('click', (event) => {
   const clickY = event.clientY - rect.top;
   const refundRangeX = 18;
   const refundRangeY = 37;
+  const targetIdx = towers.findIndex((tower) => {
+    if (
+      tower.x < clickX &&
+      clickX < tower.x + tower.width &&
+      tower.y < clickY &&
+      clickY < tower.y + tower.height
+    )
+      return true;
+  });
 
   if (isBuyMode) {
     if (userGold >= towerCost) {
@@ -177,13 +223,23 @@ canvas.addEventListener('click', (event) => {
 
       const tower = new Tower(x, y);
       towers.push(tower);
-      sendEvent(22, { x, y, userGold }); //타워 생성 후 좌표 보내기
+      sendEvent(22, { x, y, userGold }); // 타워 생성 후 좌표 보내기
       tower.draw(ctx, towerImage);
     } else {
       console.log('골드가 부족합니다.');
       return;
     }
-    isBuyMode = false;
+    initControlModes();
+  } else if (isRefundMode) {
+    if (targetIdx != -1) {
+      sendEvent(25, { towerIdx: targetIdx });
+      initControlModes();
+    }
+  } else if (isUpgradeMode) {
+    if (targetIdx != -1) {
+      sendEvent(26, { towerIdx: targetIdx });
+      initControlModes();
+    }
   }
 });
 
@@ -470,14 +526,16 @@ Promise.all([
   serverSocket.on('refundTower', (response) => {
     const { data } = response;
 
-    towers.pop();
+    towers.splice(data.towerIdx, 1);
     userGold = data.gold;
 
     console.log(response);
   });
 
   serverSocket.on('opponentRefundTower', (response) => {
-    opponentTowers.pop();
+    const { data } = response;
+
+    opponentTowers.splice(data.towerIdx, 1);
 
     console.log(response);
   });
@@ -526,14 +584,6 @@ const placeTowerFromOpponent = (x, y) => {
   tower.draw(opponentCtx, towerImage);
 };
 
-function refundLastTower() {
-  sendEvent(25, {});
-}
-
-function upgradeRandomTower() {
-  sendEvent(26, {});
-}
-
 const buyTowerButton = document.createElement('button');
 buyTowerButton.textContent = '타워 구입';
 buyTowerButton.style.position = 'absolute';
@@ -558,7 +608,7 @@ refundTowerButton.style.fontSize = '16px';
 refundTowerButton.style.cursor = 'pointer';
 refundTowerButton.style.display = 'none';
 
-refundTowerButton.addEventListener('click', refundLastTower);
+refundTowerButton.addEventListener('click', refundTower);
 
 document.body.appendChild(refundTowerButton);
 
@@ -572,6 +622,6 @@ upgradeTowerButton.style.fontSize = '16px';
 upgradeTowerButton.style.cursor = 'pointer';
 upgradeTowerButton.style.display = 'none';
 
-upgradeTowerButton.addEventListener('click', upgradeRandomTower);
+upgradeTowerButton.addEventListener('click', upgradeTower);
 
 document.body.appendChild(upgradeTowerButton);
