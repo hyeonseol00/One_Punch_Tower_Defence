@@ -73,7 +73,7 @@ for (let i = 1; i <= NUM_OF_MONSTERS; i++) {
 
 let bgm;
 const chatBox = document.getElementById('chatBox');
-chatBox.style.display = 'block';
+
 const chatInput = document.getElementById('chatInput');
 
 chatInput.addEventListener('keydown', function (event) {
@@ -274,6 +274,7 @@ function initGame() {
   setInterval(spawnMonster, monsterSpawnInterval); // 설정된 몬스터 생성 주기마다 몬스터 생성
   gameLoop(); // 게임 루프 최초 실행
   isInitGame = true;
+  document.getElementById('chatBox').style.display = 'block';
 }
 
 // 이미지 로딩 완료 후 서버와 연결하고 게임 초기화
