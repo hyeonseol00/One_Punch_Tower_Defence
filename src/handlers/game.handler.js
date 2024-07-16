@@ -22,7 +22,7 @@ export const gameMatch = async (userId, io, socket) => {
   }
 };
 
-export const gameEnd = async (userId, payload) => {
+export const gameEnd = async (userId, payload, socket, io) => {
   const userData = await getUserData(userId);
 
   if (Math.abs(userData.score - payload.score) >= 200) {
@@ -40,16 +40,13 @@ export const gameEnd = async (userId, payload) => {
 
   if (highScore < payload.score) {
     await updateHighScore(payload.score);
-    return {
+    io.emit('response', {
       status: 'success',
       message: '게임 종료, 최고기록이 갱신되었습니다!',
-      broadcast: {
-        message: '서버 최고기록이 갱신되었습니다!',
-        userId,
-        highscore: payload.score,
-      },
-    };
+      data: { userId, highscore: payload.score },
+    });
+    return;
   }
 
-  return { status: 'success', message: '게임 종료!', data: userData };
+  socket.emit('response', { status: 'success', message: '게임 종료!', data: userData });
 };
