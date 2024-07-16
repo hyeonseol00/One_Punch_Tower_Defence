@@ -13,7 +13,7 @@ export const placeTowerHandler = async (userId, payload, socket) => {
     x: payload.x,
     y: payload.y,
   });
-  userData.tower_isUpgrades.push(false);
+  userData.tower_is_upgrades.push(false);
   await updateUserData(userData);
 
   // 다른 클라이언트에 데이터 전송
@@ -30,60 +30,70 @@ export const placeTowerHandler = async (userId, payload, socket) => {
   });
 };
 
-export const refundTowerHandler = async (userId, payload) => {
+export const refundTowerHandler = async (userId, payload, socket) => {
+  const { towerIdx } = payload;
   const userData = await getUserData(userId);
   const { commonData } = getGameAssets();
 
-  if (userData.tower_coordinates.length <= 0)
-    return { status: 'fail', message: '환불할 수 있는 타워가 없습니다!' };
+  if (userData.tower_coordinates.length <= 0) {
+    socket.emit({ status: 'fail', message: '환불할 수 있는 타워가 없습니다!' });
+    return;
+  }
 
-  if (userData.tower_isUpgrades.at(-1)) {
+  if (userData.tower_is_upgrades.at(towerIdx)) {
     userData.gold += commonData.tower_cost * 2;
   } else {
     userData.gold += commonData.tower_cost;
   }
-  userData.tower_coordinates.pop();
-  userData.tower_isUpgrades.pop();
+  userData.tower_coordinates.splice(towerIdx, 1);
+  userData.tower_is_upgrades.splice(towerIdx, 1);
   await updateUserData(userData);
 
-  return {
+  socket.emit('refundTower', {
     status: 'success',
-    message: '마지막으로 설치한 타워가 성공적으로 환불되었습니다.',
-    refundTower: userData,
-  };
+    message: '선택한 타워가 성공적으로 환불되었습니다.',
+    data: { towerIdx, gold: userData.gold },
+  });
+  socket.to('gameSession').emit('opponentRefundTower', {
+    status: 'success',
+    message: '상대가 타워를 환불했습니다.',
+    data: { towerIdx },
+  });
 };
 
-export const upgradeTowerHandler = async (userId, payload) => {
+export const upgradeTowerHandler = async (userId, payload, socket) => {
+  const { towerIdx } = payload;
   const userData = await getUserData(userId);
   const { commonData } = getGameAssets();
 
-  if (userData.tower_isUpgrades.findIndex((bool) => bool == false) == -1) {
-    return {
+  if (userData.tower_is_upgrades.findIndex((bool) => bool == false) == -1) {
+    socket.emit('response', {
       status: 'fail',
       message: '업그레이드 할 수 있는 타워가 없습니다!',
-    };
+    });
+    return;
   }
 
   if (userData.gold < commonData.tower_cost) {
-    return {
+    socket.emit('response', {
       status: 'fail',
       message: '업그레이드에 필요한 골드가 부족합니다!',
-    };
+    });
+    return;
   }
 
-  let randIdx;
-  do {
-    randIdx = Math.floor(Math.random() * userData.tower_isUpgrades.length);
-  } while (userData.tower_isUpgrades[randIdx] != false);
-
   userData.gold -= commonData.tower_cost;
-  userData.tower_isUpgrades[randIdx] = true;
+  userData.tower_is_upgrades[towerIdx] = true;
   await updateUserData(userData);
 
-  return {
+  socket.emit('upgradeTower', {
     status: 'success',
     message: '타워 하나가 성공적으로 업그레이드 되었습니다.',
-    data: userData,
-    towerIdx: randIdx,
-  };
+    data: { gold: userData.gold, towerIdx },
+  });
+  socket.to('gameSession').emit('opponentUpgradeTower', {
+    status: 'success',
+    message: '상대방의 타워 하나가 업그레이드 되었습니다.',
+    data: { towerIdx },
+  });
 };

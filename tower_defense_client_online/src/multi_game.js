@@ -50,6 +50,9 @@ const opponentTowers = []; // 상대방 타워 목록
 let opponentId; // 상대방 아이디
 
 let isInitGame = false;
+let isBuyMode = false; // 타워 구입 모드(기본off)
+let isRefundMode = false;
+let isUpgradeMode = false;
 
 // 이미지 로딩 파트
 const backgroundImage = new Image();
@@ -57,6 +60,9 @@ backgroundImage.src = 'images/bg.webp';
 
 const towerImage = new Image();
 towerImage.src = 'images/tower.png';
+
+const upgradedtowerImage = new Image();
+upgradedtowerImage.src = 'images/tower_upgraded.png';
 
 const baseImage = new Image();
 baseImage.src = 'images/base.png';
@@ -156,18 +162,86 @@ function placeInitialTowers(initialTowerCoords, initialTowers, context) {
 }
 
 function placeNewTower() {
-  // 타워를 구입할 수 있는 자원이 있을 때 타워 구입 후 랜덤 배치
-  if (userGold < towerCost) {
-    console.log('골드가 부족합니다.');
-    return;
-  }
+  const tempIsBuyMode = !isBuyMode;
 
-  const { x, y } = getRandomPositionNearPath(200);
-  const tower = new Tower(x, y);
-  towers.push(tower);
-  sendEvent(22, { x, y, userGold }); //타워 생성 후 좌표 보내기
-  tower.draw(ctx, towerImage);
+  initControlModes();
+  isBuyMode = tempIsBuyMode;
+
+  if (isBuyMode) buyTowerButton.style.background = 'green';
+  else buyTowerButton.style.background = 'buttonface';
 }
+
+function refundTower() {
+  const tempIsRefundMode = !isRefundMode;
+
+  initControlModes();
+  isRefundMode = tempIsRefundMode;
+
+  if (isRefundMode) refundTowerButton.style.background = 'green';
+  else refundTowerButton.style.background = 'buttonface';
+}
+
+function upgradeTower() {
+  const tempIsUpgradeMode = !isUpgradeMode;
+
+  initControlModes();
+  isUpgradeMode = tempIsUpgradeMode;
+
+  if (isUpgradeMode) upgradeTowerButton.style.background = 'green';
+  else upgradeTowerButton.style.background = 'buttonface';
+}
+
+function initControlModes() {
+  isBuyMode = false;
+  isRefundMode = false;
+  isUpgradeMode = false;
+  buyTowerButton.style.background = 'buttonface';
+  refundTowerButton.style.background = 'buttonface';
+  upgradeTowerButton.style.background = 'buttonface';
+}
+
+canvas.addEventListener('click', (event) => {
+  const rect = canvas.getBoundingClientRect();
+  const clickX = event.clientX - rect.left;
+  const clickY = event.clientY - rect.top;
+  const refundRangeX = 18;
+  const refundRangeY = 37;
+  const targetIdx = towers.findIndex((tower) => {
+    if (
+      tower.x < clickX &&
+      clickX < tower.x + tower.width &&
+      tower.y < clickY &&
+      clickY < tower.y + tower.height
+    )
+      return true;
+  });
+
+  if (isBuyMode) {
+    if (userGold >= towerCost) {
+      const x = clickX - refundRangeX;
+      const y = clickY - refundRangeY;
+
+      const tower = new Tower(x, y);
+      towers.push(tower);
+      sendEvent(22, { x, y, userGold }); // 타워 생성 후 좌표 보내기
+      tower.draw(ctx, towerImage);
+    } else {
+      console.log('골드가 부족합니다.');
+      return;
+    }
+    initControlModes();
+  } else if (isRefundMode) {
+    if (targetIdx != -1) {
+      sendEvent(25, { towerIdx: targetIdx });
+      initControlModes();
+    }
+  } else if (isUpgradeMode) {
+    if (targetIdx != -1) {
+      sendEvent(26, { towerIdx: targetIdx });
+      initControlModes();
+    }
+  }
+});
 
 function placeBase(position, isPlayer) {
   if (isPlayer) {
@@ -204,7 +278,8 @@ function gameLoop() {
 
   // 타워 그리기 및 몬스터 공격 처리
   towers.forEach((tower, towerIdx) => {
-    tower.draw(ctx, towerImage);
+    const targetTowerImage = tower.isUpgraded ? upgradedtowerImage : towerImage;
+    tower.draw(ctx, targetTowerImage);
     tower.updateCooldown();
     monsters.forEach((monster, monsterIdx) => {
       const distance = Math.sqrt(
@@ -246,7 +321,8 @@ function gameLoop() {
   drawPath(opponentMonsterPath, opponentCtx); // 상대방 경로 다시 그리기
 
   opponentTowers.forEach((tower) => {
-    tower.draw(opponentCtx, towerImage);
+    const targetTowerImage = tower.isUpgraded ? upgradedtowerImage : towerImage;
+    tower.draw(opponentCtx, targetTowerImage);
     tower.updateCooldown(); // 적 타워의 쿨다운 업데이트
   });
 
@@ -320,6 +396,8 @@ Promise.all([
         progressBarContainer.style.display = 'none';
         progressBar.style.display = 'none';
         buyTowerButton.style.display = 'block';
+        upgradeTowerButton.style.display = 'block';
+        refundTowerButton.style.display = 'block';
         canvas.style.display = 'block';
         opponentCanvas.style.display = 'block';
 
@@ -351,6 +429,7 @@ Promise.all([
       }
     }, 300);
   });
+
   serverSocket.on('messageReceived', (response) => {
     const { content } = response.data;
     if (content !== '') {
@@ -426,6 +505,42 @@ Promise.all([
     console.log(response);
   });
 
+  serverSocket.on('upgradeTower', (response) => {
+    const { data } = response;
+
+    towers[data.towerIdx].isUpgraded = true;
+    userGold = data.gold;
+    towers[data.towerIdx].draw(ctx, upgradedtowerImage);
+
+    console.log(response);
+  });
+
+  serverSocket.on('opponentUpgradeTower', (response) => {
+    const { data } = response;
+
+    opponentTowers[data.towerIdx].isUpgraded = true;
+    opponentTowers[data.towerIdx].draw(ctx, upgradedtowerImage);
+
+    console.log(response);
+  });
+
+  serverSocket.on('refundTower', (response) => {
+    const { data } = response;
+
+    towers.splice(data.towerIdx, 1);
+    userGold = data.gold;
+
+    console.log(response);
+  });
+
+  serverSocket.on('opponentRefundTower', (response) => {
+    const { data } = response;
+
+    opponentTowers.splice(data.towerIdx, 1);
+
+    console.log(response);
+  });
+
   serverSocket.on('gameOver', (response) => {
     bgm.pause();
     const { isWin } = response.data;
@@ -433,6 +548,7 @@ Promise.all([
     const loseSound = new Audio('sounds/lose.wav');
     winSound.volume = 0.3;
     loseSound.volume = 0.3;
+
     if (isWin) {
       winSound.play().then(() => {
         alert('당신이 게임에서 승리했습니다!');
@@ -440,9 +556,9 @@ Promise.all([
       });
     } else {
       loseSound.play().then(() => {
-        sendEvent(3, { myId: myId, opponentId: opponentId, score: score });
-        alert('아쉽지만 대결에서 패배하셨습니다! 다음 대결에서는 꼭 이기세요!');
         // TODO. 게임 종료 이벤트 전송
+        sendEvent(3, { myId, opponentId, score });
+        alert('아쉽지만 대결에서 패배하셨습니다! 다음 대결에서는 꼭 이기세요!');
         location.reload();
       });
     }
@@ -482,3 +598,31 @@ buyTowerButton.style.display = 'none';
 buyTowerButton.addEventListener('click', placeNewTower);
 
 document.body.appendChild(buyTowerButton);
+
+const refundTowerButton = document.createElement('button');
+refundTowerButton.textContent = '타워 환불';
+refundTowerButton.style.position = 'absolute';
+refundTowerButton.style.top = '10px';
+refundTowerButton.style.right = '160px';
+refundTowerButton.style.padding = '10px 20px';
+refundTowerButton.style.fontSize = '16px';
+refundTowerButton.style.cursor = 'pointer';
+refundTowerButton.style.display = 'none';
+
+refundTowerButton.addEventListener('click', refundTower);
+
+document.body.appendChild(refundTowerButton);
+
+const upgradeTowerButton = document.createElement('button');
+upgradeTowerButton.textContent = '타워 업그레이드';
+upgradeTowerButton.style.position = 'absolute';
+upgradeTowerButton.style.top = '10px';
+upgradeTowerButton.style.right = '310px';
+upgradeTowerButton.style.padding = '10px 20px';
+upgradeTowerButton.style.fontSize = '16px';
+upgradeTowerButton.style.cursor = 'pointer';
+upgradeTowerButton.style.display = 'none';
+
+upgradeTowerButton.addEventListener('click', upgradeTower);
+
+document.body.appendChild(upgradeTowerButton);

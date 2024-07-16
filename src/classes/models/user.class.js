@@ -8,11 +8,12 @@ class User {
     this.id = userId;
     this.gold = gameAssets.commonData.user_gold;
     this.hp = gameAssets.commonData.base_hp;
-    this.numOfInitialTowers = 0;
+    this.numOfInitialTowers = gameAssets.commonData.num_of_initial_towers;
     this.monsterLevel = 1;
     this.score = score;
     this.highScore = highScore;
     this.towerCoords = [];
+    this.towerIsUpgrades = [];
 
     this.makePath();
     this.placeInitialTowers();
@@ -68,6 +69,7 @@ class User {
       const y = posY + offsetY;
 
       this.towerCoords.push({ x, y });
+      this.towerIsUpgrades.push(false);
     }
   }
 }
