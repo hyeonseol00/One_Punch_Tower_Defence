@@ -9,10 +9,6 @@ export const handleDisconnect = async (socket, userID) => {
   const myUser = gameSessions.findIndex((user) => user.id === userID);
   const opponentUser = gameSessions.findIndex((user) => user.id !== userID);
 
-  if (myUser !== -1 && opponentUser !== -1) {
-    createHistory(gameSessions[myUser].id, gameSessions[opponentUser].id);
-  }
-
   gameSessions.splice(myUser, 1);
 
   await removeUser(socket.id);
