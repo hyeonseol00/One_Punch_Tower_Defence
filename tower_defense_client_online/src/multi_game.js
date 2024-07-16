@@ -85,7 +85,7 @@ chatInput.addEventListener('keydown', function (event) {
   if (event.key == 'Enter') {
     const message = chatInput.value;
     chatInput.value = '';
-    sendEvent(50, { myId, message });
+    sendEvent(101, { myId, message });
   }
 });
 
@@ -204,7 +204,7 @@ canvas.addEventListener('click', (event) => {
 
       const tower = new Tower(x, y);
       towers.push(tower);
-      sendEvent(22, { x, y, userGold }); // 타워 생성 후 좌표 보내기
+      sendEvent(21, { x, y, userGold }); // 타워 생성 후 좌표 보내기
       tower.draw(ctx, towerImage);
     } else {
       console.log('골드가 부족합니다.');
@@ -213,12 +213,12 @@ canvas.addEventListener('click', (event) => {
     initControlModes();
   } else if (isRefundMode) {
     if (targetIdx != -1) {
-      sendEvent(25, { towerIdx: targetIdx });
+      sendEvent(22, { towerIdx: targetIdx });
       initControlModes();
     }
   } else if (isUpgradeMode) {
     if (targetIdx != -1) {
-      sendEvent(26, { towerIdx: targetIdx });
+      sendEvent(23, { towerIdx: targetIdx });
       initControlModes();
     }
   }
@@ -239,7 +239,7 @@ function spawnMonster() {
   monsters.push(newMonster);
 
   // TODO. 서버로 몬스터 생성 이벤트 전송
-  sendEvent(101, { monsterNumber: newMonster.monsterNumber, pathIdx: spawnMonsterPathCount });
+  sendEvent(31, { monsterNumber: newMonster.monsterNumber, pathIdx: spawnMonsterPathCount });
 
   if (++spawnMonsterPathCount >= monsterPaths.length) {
     spawnMonsterPathCount = 0;
@@ -274,7 +274,7 @@ function gameLoop() {
       );
       if (distance < tower.range) {
         tower.attack(monster);
-        sendEvent(102, { towerIdx, monsterIdx });
+        sendEvent(24, { towerIdx, monsterIdx });
       }
     });
   });
@@ -292,13 +292,13 @@ function gameLoop() {
         attackedSound.volume = 0.3;
         attackedSound.play();
         // TODO. 몬스터가 기지를 공격했을 때 서버로 이벤트 전송
-        sendEvent(23, { monsterIndex: i, score });
-        sendEvent(24, { hp: base.hp, damage: monster.attackPower });
+        sendEvent(32, { monsterIndex: i, score });
+        sendEvent(33, { hp: base.hp, damage: monster.attackPower });
         monsters.splice(i, 1);
       }
     } else {
       // TODO. 몬스터 사망 이벤트 전송
-      sendEvent(23, { monsterIndex: i, score });
+      sendEvent(32, { monsterIndex: i, score });
       monsters.splice(i, 1);
     }
   }
