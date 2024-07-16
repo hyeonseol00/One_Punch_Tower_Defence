@@ -15,14 +15,29 @@ class User {
     this.towerCoords = [];
     this.towerIsUpgrades = [];
 
-    this.makePath();
+    this.initPaths();
     this.placeInitialTowers();
   }
 
-  makePath() {
+  initPaths() {
+    const newPaths = [];
+
+    newPaths.push(this.getNewPath(230));
+    newPaths.push(this.getNewPath(430));
+    for (let i = 1; i < newPaths.length; i++) {
+      for (let j = 1; j <= 3; j++) {
+        newPaths[i][newPaths[i].length - j] = newPaths[0].at(-j);
+      }
+    }
+
+    this.monsterPaths = newPaths;
+    this.basePosition = newPaths[0].at(-1);
+  }
+
+  getNewPath(inductionY) {
     const path = [];
     let currentX = 0;
-    let currentY = Math.floor(Math.random() * 21) + 330; // 500 ~ 520 범위의 y 시작 (캔버스 y축 중간쯤에서 시작할 수 있도록 유도)
+    let currentY = Math.floor(Math.random() * 21) + inductionY; // 500 ~ 520 범위의 y 시작 (캔버스 y축 중간쯤에서 시작할 수 있도록 유도)
 
     path.push({ x: currentX, y: currentY });
 
@@ -45,17 +60,17 @@ class User {
       path.push({ x: currentX, y: currentY });
     }
 
-    this.monsterPath = path;
-    this.basePosition = path.at(-1);
+    return path;
   }
 
   placeInitialTowers() {
     for (let i = 0; i < this.numOfInitialTowers; i++) {
-      const segmentIndex = Math.floor(Math.random() * (this.monsterPath.length - 1));
-      const startX = this.monsterPath[segmentIndex].x;
-      const startY = this.monsterPath[segmentIndex].y;
-      const endX = this.monsterPath[segmentIndex + 1].x;
-      const endY = this.monsterPath[segmentIndex + 1].y;
+      const pathIdx = i % this.monsterPaths.length;
+      const segmentIndex = Math.floor(Math.random() * (this.monsterPaths[pathIdx].length - 4));
+      const startX = this.monsterPaths[pathIdx][segmentIndex].x;
+      const startY = this.monsterPaths[pathIdx][segmentIndex].y;
+      const endX = this.monsterPaths[pathIdx][segmentIndex + 1].x;
+      const endY = this.monsterPaths[pathIdx][segmentIndex + 1].y;
       const maxDistance = 100;
 
       const t = Math.random();
