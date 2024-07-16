@@ -53,22 +53,24 @@ export const refundTowerHandler = async (userId, payload) => {
   };
 };
 
-export const upgradeTowerHandler = async (userId, payload) => {
+export const upgradeTowerHandler = async (userId, payload, socket) => {
   const userData = await getUserData(userId);
   const { commonData } = getGameAssets();
 
   if (userData.tower_isUpgrades.findIndex((bool) => bool == false) == -1) {
-    return {
+    socket.emit('response', {
       status: 'fail',
       message: '업그레이드 할 수 있는 타워가 없습니다!',
-    };
+    });
+    return;
   }
 
   if (userData.gold < commonData.tower_cost) {
-    return {
+    socket.emit('response', {
       status: 'fail',
       message: '업그레이드에 필요한 골드가 부족합니다!',
-    };
+    });
+    return;
   }
 
   let randIdx;
@@ -80,10 +82,14 @@ export const upgradeTowerHandler = async (userId, payload) => {
   userData.tower_isUpgrades[randIdx] = true;
   await updateUserData(userData);
 
-  return {
+  socket.emit('upgradeTower', {
     status: 'success',
     message: '타워 하나가 성공적으로 업그레이드 되었습니다.',
-    data: userData,
-    towerIdx: randIdx,
-  };
+    data: { gold: userData.gold, towerIdx: randIdx },
+  });
+  socket.to('gameSession').emit('opponentUpgradeTower', {
+    status: 'success',
+    message: '상대방의 타워 하나가 업그레이드 되었습니다.',
+    data: { towerIdx: randIdx },
+  });
 };
