@@ -15,11 +15,13 @@ export const gameMatch = async (userId, io, socket) => {
 
   const user = new User(userId, score, highScore);
 
+  userData.tower_coordinates = user.towerCoords;
+  userData.tower_is_upgrades = user.towerIsUpgrades;
+  updateUserData(userData);
+
   addQueue(user);
   socket.join('gameSession');
-
   const gameSession = getGameSession();
-
   if (gameSessions.length > 1) {
     io.emit('matchFound', gameSession);
   }
