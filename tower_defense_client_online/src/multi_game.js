@@ -432,6 +432,7 @@ Promise.all([
     const loseSound = new Audio('sounds/lose.wav');
     winSound.volume = 0.3;
     loseSound.volume = 0.3;
+
     if (isWin) {
       winSound.play().then(() => {
         alert('당신이 게임에서 승리했습니다!');
@@ -439,9 +440,9 @@ Promise.all([
       });
     } else {
       loseSound.play().then(() => {
-        sendEvent(3, { myId: myId, opponentId: opponentId, score: score });
-        alert('아쉽지만 대결에서 패배하셨습니다! 다음 대결에서는 꼭 이기세요!');
         // TODO. 게임 종료 이벤트 전송
+        sendEvent(3, { myId, opponentId, score });
+        alert('아쉽지만 대결에서 패배하셨습니다! 다음 대결에서는 꼭 이기세요!');
         location.reload();
       });
     }
