@@ -3,8 +3,10 @@ import { getUserData, updateUserData } from '../models/user-data.model.js';
 export const baseUnderAttackHandler = async (userId, payload, socket) => {
   const userData = await getUserData(userId);
 
-  if (userData.hp < payload.hp)
-    return { status: 'fail', message: '기지 체력 데이터가 잘못되었습니다!' };
+  if (userData.hp < payload.hp) {
+    socket.emit('response', { status: 'fail', message: '기지 체력 데이터가 잘못되었습니다!' });
+    return;
+  }
 
   userData.hp -= payload.damage;
 

@@ -1,7 +1,6 @@
 import { CLIENT_VERSION } from '../constants.js';
-import { getGameAssets } from '../init/assets.js';
+import { getGameAssets } from '../session/assets.session.js';
 import { createHistory } from '../models/history.model.js';
-import { getUserData } from '../models/user-data.model.js';
 import { getUsers, removeUser } from '../models/user.model.js';
 import { gameSessions } from '../session/session.js';
 import handlerMappings from './handlerMapping.js';
@@ -54,5 +53,5 @@ export const handleEvent = async (io, socket, data) => {
     return;
   }
 
-  const response = await handler(data.userId, data.payload, socket, io);
+  await handler(data.userId, data.payload, socket, io);
 };

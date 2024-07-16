@@ -1,12 +1,14 @@
-import { getGameAssets } from '../init/assets.js';
+import { getGameAssets } from '../session/assets.session.js';
 import { getUserData, updateUserData } from '../models/user-data.model.js';
 
 export const placeTowerHandler = async (userId, payload, socket) => {
   const userData = await getUserData(userId);
   const { commonData } = getGameAssets();
 
-  if (userData.gold < commonData.tower_cost)
-    return { status: 'fail', message: '돈이 부족해 구매에 실패했습니다!' };
+  if (userData.gold < commonData.tower_cost) {
+    socket.emit('response', { status: 'fail', message: '돈이 부족해 구매에 실패했습니다!' });
+    return;
+  }
 
   userData.gold -= commonData.tower_cost;
   userData.tower_coordinates.push({

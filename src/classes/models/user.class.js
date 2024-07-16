@@ -1,5 +1,5 @@
 import { config } from '../../config/config.js';
-import { getGameAssets } from '../../init/assets.js';
+import { getGameAssets } from '../../session/assets.session.js';
 
 class User {
   constructor(userId, score, highScore) {

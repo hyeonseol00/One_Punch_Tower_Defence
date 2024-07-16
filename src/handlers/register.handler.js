@@ -1,7 +1,7 @@
 import { addUser } from '../models/user.model.js';
 import { handleConnection, handleDisconnect, handleEvent } from './helper.js';
 import { addUserData, getUserData, updateUserData } from '../models/user-data.model.js';
-import { getGameAssets } from '../init/assets.js';
+import { getGameAssets } from '../session/assets.session.js';
 import cookieParser from 'cookie-parser';
 import authMiddleware from '../middlewares/auth.middleware.js';
 import { gameMatch } from './game.handler.js';
