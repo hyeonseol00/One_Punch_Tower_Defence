@@ -26,7 +26,7 @@ export const spawnMonsterHandler = async (userId, payload, socket) => {
   socket.to('gameSession').emit('opponentMonsterSpawn', {
     status: 'success',
     message: '상대 몬스터가 스폰되었습니다.',
-    data: { monsterNumber: payload.monsterNumber },
+    data: { monsterNumber: payload.monsterNumber, pathIdx: payload.pathIdx },
   });
 };
 

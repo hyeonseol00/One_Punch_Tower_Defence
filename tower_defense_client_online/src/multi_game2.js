@@ -31,7 +31,7 @@ let userGold = 0; // 유저 골드
 let base; // 기지 객체
 let baseHp = 0; // 기지 체력
 let monsterLevel = 0; // 몬스터 레벨
-let monsterPath; // 몬스터 경로
+let monsterPaths; // 몬스터 경로
 let initialTowerCoords; // 초기 타워 좌표
 let basePosition; // 기지 좌표
 const monsters = []; // 유저 몬스터 목록
@@ -39,10 +39,11 @@ const towers = []; // 유저 타워 목록
 let score = 0; // 게임 점수
 let highScore = 0; // 기존 최고 점수
 let myId; // 내 아이디
+let spawnMonsterPathCount = 0;
 
 // 상대 데이터
 let opponentBase; // 상대방 기지 객체
-let opponentMonsterPath; // 상대방 몬스터 경로
+let opponentMonsterPaths; // 상대방 몬스터 경로
 let opponentInitialTowerCoords; // 상대방 초기 타워 좌표
 let opponentBasePosition; // 상대방 기지 좌표
 const opponentMonsters = []; // 상대방 몬스터 목록
@@ -79,6 +80,7 @@ for (let i = 1; i <= NUM_OF_MONSTERS; i++) {
 
 let bgm;
 const chatBox = document.getElementById('chatBox');
+
 const chatInput = document.getElementById('chatInput');
 
 chatInput.addEventListener('keydown', function (event) {
@@ -91,8 +93,10 @@ chatInput.addEventListener('keydown', function (event) {
 
 function initMap() {
   ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height); // 배경 이미지 그리기
-  drawPath(monsterPath, ctx);
-  drawPath(opponentMonsterPath, opponentCtx);
+  for (let i = 0; i < monsterPaths.length; i++) {
+    drawPath(monsterPaths[i], ctx);
+    drawPath(opponentMonsterPaths[i], opponentCtx);
+  }
   placeInitialTowers(initialTowerCoords, towers, ctx); // 초기 타워 배치
   placeInitialTowers(opponentInitialTowerCoords, opponentTowers, opponentCtx); // 상대방 초기 타워 배치
   placeBase(basePosition, true);
@@ -130,26 +134,6 @@ function drawRotatedImage(image, x, y, width, height, angle, context) {
   context.rotate(angle);
   context.drawImage(image, -width / 2, -height / 2, width, height);
   context.restore();
-}
-
-function getRandomPositionNearPath(maxDistance) {
-  const segmentIndex = Math.floor(Math.random() * (monsterPath.length - 1));
-  const startX = monsterPath[segmentIndex].x;
-  const startY = monsterPath[segmentIndex].y;
-  const endX = monsterPath[segmentIndex + 1].x;
-  const endY = monsterPath[segmentIndex + 1].y;
-
-  const t = Math.random();
-  const posX = startX + t * (endX - startX);
-  const posY = startY + t * (endY - startY);
-
-  const offsetX = (Math.random() - 0.5) * 2 * maxDistance;
-  const offsetY = (Math.random() - 0.5) * 2 * maxDistance;
-
-  return {
-    x: posX + offsetX,
-    y: posY + offsetY,
-  };
 }
 
 function placeInitialTowers(initialTowerCoords, initialTowers, context) {
@@ -253,17 +237,23 @@ function placeBase(position, isPlayer) {
 }
 
 function spawnMonster() {
-  const newMonster = new Monster(monsterPath, monsterImages, monsterLevel);
+  const newMonster = new Monster(monsterPaths[spawnMonsterPathCount], monsterImages, monsterLevel);
   monsters.push(newMonster);
 
   // TODO. 서버로 몬스터 생성 이벤트 전송
-  sendEvent(101, { monsterNumber: newMonster.monsterNumber });
+  sendEvent(101, { monsterNumber: newMonster.monsterNumber, pathIdx: spawnMonsterPathCount });
+
+  if (++spawnMonsterPathCount >= monsterPaths.length) {
+    spawnMonsterPathCount = 0;
+  }
 }
 
 function gameLoop() {
   // 렌더링 시에는 항상 배경 이미지부터 그려야 합니다! 그래야 다른 이미지들이 배경 이미지 위에 그려져요!
   ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height); // 배경 이미지 다시 그리기
-  drawPath(monsterPath, ctx); // 경로 다시 그리기
+  for (let i = 0; i < monsterPaths.length; i++) {
+    drawPath(monsterPaths[i], ctx); // 경로 다시 그리기
+  }
 
   ctx.font = '25px Times New Roman';
   ctx.fillStyle = 'skyblue';
@@ -317,8 +307,9 @@ function gameLoop() {
 
   // 상대방 게임 화면 업데이트
   opponentCtx.drawImage(backgroundImage, 0, 0, opponentCanvas.width, opponentCanvas.height);
-  drawPath(opponentMonsterPath, opponentCtx); // 상대방 경로 다시 그리기
-
+  for (let i = 0; i < opponentMonsterPaths.length; i++) {
+    drawPath(opponentMonsterPaths[i], opponentCtx); // 상대방 경로 다시 그리기
+  }
   opponentTowers.forEach((tower) => {
     const targetTowerImage = tower.isUpgraded ? upgradedtowerImage : towerImage;
     tower.draw(opponentCtx, targetTowerImage);
@@ -411,14 +402,14 @@ Promise.all([
           userGold = userData.gold;
           baseHp = userData.hp;
           monsterLevel = userData.monsterLevel;
-          monsterPath = userData.monsterPath;
+          monsterPaths = userData.monsterPaths;
           basePosition = userData.basePosition;
           score = userData.score;
           highScore = userData.highScore;
           initialTowerCoords = userData.towerCoords;
           myId = userData.id;
 
-          opponentMonsterPath = opponentUserData.monsterPath;
+          opponentMonsterPaths = opponentUserData.monsterPaths;
           opponentBasePosition = opponentUserData.basePosition;
           opponentInitialTowerCoords = opponentUserData.towerCoords;
           opponentId = opponentUserData.id;
@@ -449,7 +440,7 @@ Promise.all([
   serverSocket.on('opponentMonsterSpawn', (response) => {
     const { data } = response;
     const newOpponentMonster = new Monster(
-      opponentMonsterPath,
+      opponentMonsterPaths[data.pathIdx],
       monsterImages,
       monsterLevel,
       data.monsterNumber,
@@ -478,7 +469,7 @@ Promise.all([
 
   serverSocket.on('opponentTowerPlaced', (response) => {
     const { data } = response;
-    const { x, y, gold } = data;
+    const { x, y } = data;
     placeTowerFromOpponent(x, y);
     console.log(response);
   });
