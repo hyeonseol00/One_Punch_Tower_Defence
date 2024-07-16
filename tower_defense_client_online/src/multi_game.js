@@ -565,16 +565,20 @@ Promise.all([
       winSound.play().then(() => {
         // TODO. 게임 종료 이벤트 전송
         sendEvent(3, { score });
-        alert('당신이 게임에서 승리했습니다!');
-        location.reload();
+        setTimeout(() => {
+          alert('당신이 게임에서 승리했습니다!');
+          location.reload();
+        }, 100);
       });
     } else {
       loseSound.play().then(() => {
         // TODO. 게임 종료 이벤트 전송
-        sendEvent(4, { myId, opponentId });
         sendEvent(3, { score });
-        alert('아쉽지만 대결에서 패배하셨습니다! 다음 대결에서는 꼭 이기세요!');
-        location.reload();
+        sendEvent(4, { myId, opponentId });
+        setTimeout(() => {
+          alert('아쉽지만 대결에서 패배하셨습니다! 다음 대결에서는 꼭 이기세요!');
+          location.reload();
+        }, 100);
       });
     }
   });
