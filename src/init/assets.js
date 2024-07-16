@@ -10,7 +10,6 @@ export const loadGameAssets = async () => {
     ]);
     gameAssets.monster = monster;
     gameAssets.commonData = commonData;
-    console.log(monster, commonData);
     return gameAssets;
   } catch (error) {
     throw new Error('에셋 데이터 로드에 실패했습니다: ' + error.message);
