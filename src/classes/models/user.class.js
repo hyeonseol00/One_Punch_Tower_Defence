@@ -13,6 +13,7 @@ class User {
     this.score = score;
     this.highScore = highScore;
     this.towerCoords = [];
+    this.towerIsUpgrades = [];
 
     this.makePath();
     this.placeInitialTowers();
@@ -68,6 +69,7 @@ class User {
       const y = posY + offsetY;
 
       this.towerCoords.push({ x, y });
+      this.towerIsUpgrades.push(false);
     }
   }
 }
