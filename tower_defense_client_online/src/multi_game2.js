@@ -58,6 +58,9 @@ backgroundImage.src = 'images/bg.webp';
 const towerImage = new Image();
 towerImage.src = 'images/tower.png';
 
+const upgradedtowerImage = new Image();
+upgradedtowerImage.src = 'images/tower_upgraded.png';
+
 const baseImage = new Image();
 baseImage.src = 'images/base.png';
 
@@ -204,7 +207,8 @@ function gameLoop() {
 
   // 타워 그리기 및 몬스터 공격 처리
   towers.forEach((tower, towerIdx) => {
-    tower.draw(ctx, towerImage);
+    const targetTowerImage = tower.isUpgraded ? upgradedtowerImage : towerImage;
+    tower.draw(ctx, targetTowerImage);
     tower.updateCooldown();
     monsters.forEach((monster, monsterIdx) => {
       const distance = Math.sqrt(
@@ -246,7 +250,8 @@ function gameLoop() {
   drawPath(opponentMonsterPath, opponentCtx); // 상대방 경로 다시 그리기
 
   opponentTowers.forEach((tower) => {
-    tower.draw(opponentCtx, towerImage);
+    const targetTowerImage = tower.isUpgraded ? upgradedtowerImage : towerImage;
+    tower.draw(opponentCtx, targetTowerImage);
     tower.updateCooldown(); // 적 타워의 쿨다운 업데이트
   });
 
@@ -319,6 +324,7 @@ Promise.all([
         progressBarContainer.style.display = 'none';
         progressBar.style.display = 'none';
         buyTowerButton.style.display = 'block';
+        upgradeTowerButton.style.display = 'block';
         canvas.style.display = 'block';
         opponentCanvas.style.display = 'block';
 
@@ -425,6 +431,25 @@ Promise.all([
     console.log(response);
   });
 
+  serverSocket.on('upgradeTower', (response) => {
+    const { data } = response;
+
+    towers[data.towerIdx].isUpgraded = true;
+    userGold = data.gold;
+    towers[data.towerIdx].draw(ctx, upgradedtowerImage);
+
+    console.log(response);
+  });
+
+  serverSocket.on('opponentUpgradeTower', (response) => {
+    const { data } = response;
+
+    opponentTowers[data.towerIdx].isUpgraded = true;
+    opponentTowers[data.towerIdx].draw(ctx, upgradedtowerImage);
+
+    console.log(response);
+  });
+
   serverSocket.on('gameOver', (response) => {
     bgm.pause();
     const { isWin } = response.data;
@@ -469,6 +494,10 @@ const placeTowerFromOpponent = (x, y) => {
   tower.draw(opponentCtx, towerImage);
 };
 
+function upgradeRandomTower() {
+  sendEvent(26, {});
+}
+
 const buyTowerButton = document.createElement('button');
 buyTowerButton.textContent = '타워 구입';
 buyTowerButton.style.position = 'absolute';
@@ -482,3 +511,17 @@ buyTowerButton.style.display = 'none';
 buyTowerButton.addEventListener('click', placeNewTower);
 
 document.body.appendChild(buyTowerButton);
+
+const upgradeTowerButton = document.createElement('button');
+upgradeTowerButton.textContent = '타워 업그레이드';
+upgradeTowerButton.style.position = 'absolute';
+upgradeTowerButton.style.top = '10px';
+upgradeTowerButton.style.right = '310px';
+upgradeTowerButton.style.padding = '10px 20px';
+upgradeTowerButton.style.fontSize = '16px';
+upgradeTowerButton.style.cursor = 'pointer';
+upgradeTowerButton.style.display = 'none';
+
+upgradeTowerButton.addEventListener('click', upgradeRandomTower);
+
+document.body.appendChild(upgradeTowerButton);
