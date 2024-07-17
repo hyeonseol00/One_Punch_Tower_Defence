@@ -233,23 +233,6 @@
       toggle = !toggle;
     }
 
-   // 메시지를 추가하는 함수
-function addMessage(message) {
-  const chatLog = document.getElementById('chatLog');
-  const chatDiv = document.createElement('div');
-  chatDiv.textContent = message;
-  chatLog.appendChild(chatDiv); // 새 메시지를 가장 아래에 추가
-  chatLog.scrollTop = chatLog.scrollHeight; // 스크롤을 가장 아래로 이동
-}
-
-// 채팅 입력 시 메시지를 추가하는 이벤트 핸들러
-document.getElementById('chatInput').addEventListener('keypress', function (e) {
-  if (e.key === 'Enter') {
-    const message = e.target.value;
-    e.target.value = '';
-    addMessage(message);
-  }
-});
 
   </script>
 </body>
