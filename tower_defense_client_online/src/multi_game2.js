@@ -450,6 +450,8 @@ Promise.all([
       newMessage.textContent = content;
 
       chatLog.appendChild(newMessage);
+
+      chatLog.scrollTop = chatLog.scrollHeight;
     }
   });
 
