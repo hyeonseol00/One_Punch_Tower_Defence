@@ -1,9 +1,5 @@
-import {
-  MONSTER_KILL_REWARD,
-  MONSTER_LEVEL_UP_REWARD,
-  RESOLUTION_HEIGHT,
-  RESOLUTION_WIDTH,
-} from '../constants/canvas.js';
+import { RESOLUTION_HEIGHT, RESOLUTION_WIDTH } from '../constants/canvas.js';
+import { MONSTER_KILL_REWARD, MONSTER_LEVEL_UP_REWARD } from '../constants/reward.js';
 
 export const config = {
   canvas: {
