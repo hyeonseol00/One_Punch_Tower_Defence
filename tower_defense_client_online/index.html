@@ -37,15 +37,19 @@
       /* 내부 여백 */
       max-width: 100%;
       max-height: 100%;
+      word-wrap: break-word;
+      word-break: break-all;
+      padding: 5px;
+      box-sizing: border-box;
     }
 
     .chatLog {
-      width: 92.275%;
-      height: 90%;
+      width: 90%;
+      height: calc(100% - 40px);
       position: absolute;
       /* 부모 요소 기준 절대 위치 */
-      overflow-y: auto;
-      /* 내용이 넘치면 세로 스크롤 표시 */
+      overflow-y: scroll;
+      flex-direction: column-reverse;
     }
 
     .chatInput {
@@ -136,7 +140,7 @@
   <div id="chatBox" class="chatBox">
     <div id="draggable" class="draagable">
       <input id="chatInput" class="chatInput" type="text" />
-      <button id="resize" onclick="resizeChat()"> 줄이기 </button>
+      <button id="resize" onclick=""> 줄이기 </button>
     </div>
     <div id="chatLog" class="chatLog"></div>
   </div>
@@ -217,15 +221,18 @@
       if (toggle) {
         chatBox.style.width = '450px';
         chatBox.style.height = '300px';
+        chatLog.style.height = 'calc(100% - 40px)';
         text.textContent = "늘리기";
       }
       else {
         chatBox.style.width = '450px';
         chatBox.style.height = '100px';
+        chatLog.style.height = 'calc(100% - 40px)';
         text.textContent = "줄이기";
       }
       toggle = !toggle;
     }
+
 
   </script>
 </body>
