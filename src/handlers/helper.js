@@ -5,11 +5,19 @@ import { getUsers, removeUser } from '../models/user.model.js';
 import { gameSessions } from '../session/session.js';
 import handlerMappings from './handlerMapping.js';
 
-export const handleDisconnect = async (socket, userID) => {
+export const handleDisconnect = async (socket, userID, io) => {
   const myUser = gameSessions.findIndex((user) => user.id === userID);
   const opponentUser = gameSessions.findIndex((user) => user.id !== userID);
 
   gameSessions.splice(myUser, 1);
+
+  if (gameSessions.length > 0) {
+    io.to('gameSession').emit('gameOver', {
+      status: 'success',
+      message: '당신이 이겼습니다!',
+      data: { isWin: true },
+    });
+  }
 
   await removeUser(socket.id);
 
