@@ -507,6 +507,7 @@ Promise.all([
   serverSocket.on('monsterKill', (response) => {
     const { data } = response;
     score = data.score;
+    userGold = data.gold;
 
     // console.log(response);
   });
