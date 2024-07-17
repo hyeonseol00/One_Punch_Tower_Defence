@@ -1,6 +1,7 @@
 import { getGameAssets } from '../session/assets.session.js';
 import { getUserData, updateUserData } from '../models/user-data.model.js';
 import { config } from '../config/config.js';
+import { createData } from '../utils/response/createData.js';
 
 async function monsterLevelUp(userData) {
   const { monster, commonData } = getGameAssets();
@@ -23,10 +24,12 @@ async function monsterLevelUp(userData) {
 }
 
 export const spawnMonsterHandler = async (userId, payload, socket) => {
+  const data = { monsterNumber: payload.monsterNumber, pathIdx: payload.pathIdx };
+
   socket.to('gameSession').emit('opponentMonsterSpawn', {
     status: 'success',
     message: '상대 몬스터가 스폰되었습니다.',
-    data: { monsterNumber: payload.monsterNumber, pathIdx: payload.pathIdx },
+    data: createData(data),
   });
 };
 

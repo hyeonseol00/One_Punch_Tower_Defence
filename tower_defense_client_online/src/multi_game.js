@@ -4,6 +4,8 @@ import { Monster } from './monster.js';
 import { Tower } from './tower.js';
 
 const CLIENT_VERSION = '1.0.0';
+const TOTAL_LENGTH = 4;
+const PACKET_TYPE_LENGTH = 1;
 
 if (!localStorage.getItem('token1')) {
   alert('로그인이 필요합니다.');
@@ -388,9 +390,9 @@ Promise.all([
     }
   });
 
-  serverSocket.on('connection', (response) => {
+  serverSocket.on('connection', async (response) => {
     const { gameAssets } = response.data;
-    const singleton = new GameAssets(gameAssets);
+    const assetSingleton = new GameAssets(gameAssets);
 
     towerCost = gameAssets.commonData.tower_cost;
     monsterSpawnInterval = gameAssets.monster[0].spawn_interval;
@@ -469,8 +471,8 @@ Promise.all([
     console.log(response);
   });
 
-  serverSocket.on('opponentMonsterSpawn', (response) => {
-    const { data } = response;
+  serverSocket.on('opponentMonsterSpawn', async (response) => {
+    const data = await packetParser(response.data);
     const newOpponentMonster = new Monster(
       opponentMonsterPaths[data.pathIdx],
       monsterImages,
@@ -623,6 +625,32 @@ const placeTowerFromOpponent = (x, y) => {
   const tower = new Tower(x, y);
   opponentTowers.push(tower);
   tower.draw(opponentCtx, towerImage);
+};
+
+const packetParser = async (data) => {
+  const view = new DataView(data);
+  const length = view.getUint32(0);
+  const packetType = view.getInt8(4);
+
+  const totalHeaderLength = TOTAL_LENGTH + PACKET_TYPE_LENGTH;
+  const packet = data.slice(totalHeaderLength, totalHeaderLength + length);
+
+  let payload;
+  if (packetType == 0) {
+    try {
+      const decoder = new TextDecoder('utf-8');
+      payload = decoder.decode(packet);
+    } catch (err) {
+      throw new Error('패킷 구조가 일치하지 않습니다.');
+    }
+  }
+
+  const startIdx = payload.indexOf('{');
+  const endIdx = [...payload].indexOf('}', -1) + 1;
+  const result = payload.slice(startIdx, endIdx);
+  console.log(startIdx, endIdx, result);
+
+  return await JSON.parse(result);
 };
 
 const buyTowerButton = document.createElement('button');
