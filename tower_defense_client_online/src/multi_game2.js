@@ -6,7 +6,7 @@ const CLIENT_VERSION = '1.0.0';
 
 if (!localStorage.getItem('token2')) {
   alert('로그인이 필요합니다.');
-  location.href = '/login';
+  location.href = '/login2.html';
 }
 
 let serverSocket;
