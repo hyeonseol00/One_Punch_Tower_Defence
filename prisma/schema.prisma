@@ -18,7 +18,9 @@ model accounts {
 model match_history {
   id           Int       @id @unique(map: "id_UNIQUE") @default(autoincrement())
   userIdA      String?   @map("user_id_a") @db.VarChar(255)
+  scoreA       Int?      @map("score_a")
   userIdB      String?   @map("user_id_b") @db.VarChar(255)
+  scoreB       Int?      @map("score_b")
   userIdWinner String?   @map("user_id_winner") @db.VarChar(255)
   createdAt    DateTime? @default(now()) @map("created_at") @db.DateTime(0)
 }
