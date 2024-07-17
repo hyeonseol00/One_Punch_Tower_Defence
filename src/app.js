@@ -6,6 +6,7 @@ import { loadGameAssets } from './init/assets.js';
 import errorHandlingMiddleware from './middlewares/error-handling.middleware.js';
 import accountsRouter from './routes/accounts.router.js';
 import connect from './mongodb/index.js';
+import { loadProtos } from './init/loadProtos.js';
 
 dotEnv.config();
 connect();
@@ -21,6 +22,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use('/api', accountsRouter);
 app.use(errorHandlingMiddleware);
 initSocket(server);
+await loadProtos();
 
 server.listen(PORT, async () => {
   console.log(`서버가 ${PORT}번 포트로 실행 성공했습니다.`);
