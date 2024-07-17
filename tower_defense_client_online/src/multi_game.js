@@ -1,3 +1,4 @@
+import GameAssets from './assets.js';
 import { Base } from './base.js';
 import { Monster } from './monster.js';
 import { Tower } from './tower.js';
@@ -25,6 +26,7 @@ const NUM_OF_MONSTERS = 5; // 몬스터 개수
 // 게임 데이터
 let towerCost = 0; // 타워 구입 비용
 let monsterSpawnInterval = 0; // 몬스터 생성 주기
+let monsterSpawnIntervalId = 0;
 
 // 유저 데이터
 let userGold = 0; // 유저 골드
@@ -341,7 +343,7 @@ function initGame() {
 
   initMap(); // 맵 초기화 (배경, 몬스터 경로 그리기)
 
-  setInterval(spawnMonster, monsterSpawnInterval); // 설정된 몬스터 생성 주기마다 몬스터 생성
+  monsterSpawnIntervalId = setInterval(spawnMonster, monsterSpawnInterval); // 설정된 몬스터 생성 주기마다 몬스터 생성
   gameLoop(); // 게임 루프 최초 실행
   isInitGame = true;
   document.getElementById('chatBox').style.display = 'block';
@@ -386,13 +388,19 @@ Promise.all([
     }
   });
 
-  serverSocket.on('connection', (data) => {
-    // TODO. 서버와 연결되면 대결 대기열 큐 진입
-    towerCost = data.towerCost;
-    monsterSpawnInterval = data.monsterSpawnInterval;
+  serverSocket.on('connection', (response) => {
+    const { gameAssets } = response.data;
+    const singleton = new GameAssets(gameAssets);
+
+    towerCost = gameAssets.commonData.tower_cost;
+    monsterSpawnInterval = gameAssets.monster[0].spawn_interval;
+
+    console.log(response);
   });
 
-  serverSocket.on('matchFound', (data) => {
+  serverSocket.on('matchFound', (response) => {
+    const { gameSession } = response.data;
+
     // 상대가 매치되면 3초 뒤 게임 시작
     progressBarMessage.textContent = '게임이 3초 뒤에 시작됩니다.';
 
@@ -416,8 +424,8 @@ Promise.all([
         // TODO. 유저 및 상대방 유저 데이터 초기화
         if (!isInitGame) {
           const userId = localStorage.getItem('userId');
-          const userData = data.find((ele) => ele.id == userId);
-          const opponentUserData = data.find((ele) => ele.id != userId);
+          const userData = gameSession.find((ele) => ele.id == userId);
+          const opponentUserData = gameSession.find((ele) => ele.id != userId);
 
           console.log(userData, opponentUserData);
 
@@ -468,7 +476,7 @@ Promise.all([
       data.monsterNumber,
     );
     opponentMonsters.push(newOpponentMonster);
-    console.log(response);
+    // console.log(response);
   });
 
   serverSocket.on('opponentTowerAttack', (response) => {
@@ -499,12 +507,23 @@ Promise.all([
   serverSocket.on('monsterKill', (response) => {
     const { data } = response;
     score = data.score;
+    userGold = data.gold;
 
-    if (data.monster) {
-      monsterLevel = data.monster.level;
-      monsterSpawnInterval = data.monster.spawn_interval;
-      userGold = data.gold;
-    }
+    // console.log(response);
+  });
+
+  serverSocket.on('monsterLevelUp', (response) => {
+    const gameAssets = new GameAssets();
+    const { monster } = gameAssets.getData();
+    const { data } = response;
+
+    score = data.score;
+    monsterLevel = data.monsterLevel;
+    monsterSpawnInterval = monster[monsterLevel - 1].spawn_interval;
+    userGold = data.gold;
+
+    clearInterval(monsterSpawnIntervalId);
+    monsterSpawnIntervalId = setInterval(spawnMonster, monsterSpawnInterval);
 
     console.log(response);
   });
@@ -514,7 +533,7 @@ Promise.all([
 
     opponentMonsters.splice(data.opponentMonsterIdx, 1);
 
-    console.log(response);
+    // console.log(response);
   });
 
   serverSocket.on('upgradeTower', (response) => {

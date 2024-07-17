@@ -2,7 +2,6 @@ import User from '../classes/models/user.class.js';
 import { getHighScore, updateHighScore } from '../models/high-score.model.js';
 import { getUserData, updateUserData } from '../models/user-data.model.js';
 import { addQueue, getGameSession } from '../session/game.session.js';
-import { gameSessions } from '../session/session.js';
 
 export const gameMatch = async (userId, io, socket) => {
   const userData = await getUserData(userId);
@@ -16,9 +15,14 @@ export const gameMatch = async (userId, io, socket) => {
 
   addQueue(user);
   socket.join('gameSession');
+
   const gameSession = getGameSession();
-  if (gameSessions.length > 1) {
-    io.emit('matchFound', gameSession);
+  if (gameSession.length > 1) {
+    io.emit('matchFound', {
+      status: 'success',
+      message: '매칭이 성사되었습니다, 게임이 3초 뒤 시작됩니다!',
+      data: { gameSession },
+    });
   }
 };
 

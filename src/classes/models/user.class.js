@@ -66,7 +66,7 @@ class User {
   placeInitialTowers() {
     for (let i = 0; i < this.numOfInitialTowers; i++) {
       const pathIdx = i % this.monsterPaths.length;
-      const segmentIndex = Math.floor(Math.random() * (this.monsterPaths[pathIdx].length - 4));
+      const segmentIndex = Math.floor(Math.random() * (this.monsterPaths[pathIdx].length - 6)) + 2;
       const startX = this.monsterPaths[pathIdx][segmentIndex].x;
       const startY = this.monsterPaths[pathIdx][segmentIndex].y;
       const endX = this.monsterPaths[pathIdx][segmentIndex + 1].x;

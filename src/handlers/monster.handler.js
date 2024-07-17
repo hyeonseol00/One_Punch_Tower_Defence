@@ -1,12 +1,13 @@
 import { getGameAssets } from '../session/assets.session.js';
 import { getUserData, updateUserData } from '../models/user-data.model.js';
+import { config } from '../config/config.js';
 
 async function monsterLevelUp(userData) {
   const { monster, commonData } = getGameAssets();
 
   userData.monster_level++;
   userData.monster_spawn_interval = monster[userData.monster_level - 1].spawn_interval;
-  userData.gold += commonData.tower_cost;
+  userData.gold += config.reward.levelUpReward;
 
   await updateUserData(userData);
 
@@ -15,7 +16,7 @@ async function monsterLevelUp(userData) {
     message: '몬스터를 처치했습니다, 몬스터가 강해집니다!',
     data: {
       score: userData.score,
-      monster: monster[userData.monster_level - 1],
+      monsterLevel: userData.monster_level,
       gold: userData.gold,
     },
   };
@@ -39,6 +40,7 @@ export const killMonsterHandler = async (userId, payload, socket) => {
   }
 
   userData.score += 100;
+  userData.gold += config.reward.killReward;
 
   const sendToOpponent = () => {
     socket.to('gameSession').emit('opponentMonsterKill', {
@@ -52,7 +54,7 @@ export const killMonsterHandler = async (userId, payload, socket) => {
     const response = await monsterLevelUp(userData);
 
     sendToOpponent();
-    socket.emit('monsterKill', response);
+    socket.emit('monsterLevelUp', response);
     return;
   }
 
@@ -62,6 +64,6 @@ export const killMonsterHandler = async (userId, payload, socket) => {
   socket.emit('monsterKill', {
     status: 'success',
     message: '몬스터를 죽였습니다.',
-    data: { score: userData.score },
+    data: { score: userData.score, gold: userData.gold },
   });
 };
