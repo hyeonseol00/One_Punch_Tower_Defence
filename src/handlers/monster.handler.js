@@ -15,7 +15,7 @@ async function monsterLevelUp(userData) {
     message: '몬스터를 처치했습니다, 몬스터가 강해집니다!',
     data: {
       score: userData.score,
-      monster: monster[userData.monster_level - 1],
+      monsterLevel: userData.monster_level,
       gold: userData.gold,
     },
   };
@@ -52,7 +52,7 @@ export const killMonsterHandler = async (userId, payload, socket) => {
     const response = await monsterLevelUp(userData);
 
     sendToOpponent();
-    socket.emit('monsterKill', response);
+    socket.emit('monsterLevelUp', response);
     return;
   }
 

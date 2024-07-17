@@ -23,11 +23,12 @@ export const handleConnection = async (socket, userUUID) => {
   );
   console.log('현재 접속 중인 사용자:', await getUsers());
 
-  const { monster, commonData } = getGameAssets();
+  const gameAssets = getGameAssets();
 
   socket.emit('connection', {
-    towerCost: commonData.tower_cost,
-    monsterSpawnInterval: monster[0].spawn_interval,
+    status: 'success',
+    message: '서버에 성공적으로 연결되었습니다.',
+    data: { gameAssets },
   });
 };
 
