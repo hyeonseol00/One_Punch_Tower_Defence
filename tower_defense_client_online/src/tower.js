@@ -36,12 +36,12 @@ export class Tower {
     if (this.cooldown <= 0) {
       if (this.isUpgraded) {
         monster.hp -= this.attackPower;
-        this.cooldown = 90; // 1.5초 쿨타임 (초당 60프레임)
+        this.cooldown = 60; // 1초 쿨타임 (초당 60프레임)
         this.beamDuration = 30; // 광선 지속 시간 (0.5초)
         this.target = monster; // 광선의 목표 설정
       } else {
         monster.hp -= this.attackPower;
-        this.cooldown = 180; // 3초 쿨타임 (초당 60프레임)
+        this.cooldown = 120; // 2초 쿨타임 (초당 60프레임)
         this.beamDuration = 30; // 광선 지속 시간 (0.5초)
         this.target = monster; // 광선의 목표 설정
       }
