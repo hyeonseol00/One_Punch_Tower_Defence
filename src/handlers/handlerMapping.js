@@ -1,26 +1,25 @@
-import { baseUnderAttack } from './base.handler.js';
-import { gameEnd, gameStart } from './game.handler.js';
-import {
-  killMonsterHandler,
-  killTreasureGoblinHandler,
-} from './monster.handler.js';
-import {
-  placeInitialTowerHandler,
-  placeTowerHandler,
-  refundTowerHandler,
-  upgradeTowerHandler,
-} from './tower.handler.js';
+import { baseUnderAttackHandler } from './base.handler.js';
+import { receiveMessage } from './chat.handler.js';
+import { gameEnd } from './game.handler.js';
+import { saveHistory } from './history.handler.js';
+import { killMonsterHandler, spawnMonsterHandler } from './monster.handler.js';
+import { towerAttackHandler } from './tower-attack.handler.js';
+import { placeTowerHandler, refundTowerHandler, upgradeTowerHandler } from './tower.handler.js';
 
 const handlerMappings = {
-  2: gameStart,
   3: gameEnd,
-  21: placeInitialTowerHandler,
-  22: placeTowerHandler,
-  23: killMonsterHandler,
-  24: baseUnderAttack,
-  25: refundTowerHandler,
-  26: upgradeTowerHandler,
-  27: killTreasureGoblinHandler,
+  4: saveHistory,
+
+  21: placeTowerHandler,
+  22: refundTowerHandler,
+  23: upgradeTowerHandler,
+  24: towerAttackHandler,
+
+  31: spawnMonsterHandler,
+  32: killMonsterHandler,
+  33: baseUnderAttackHandler,
+
+  101: receiveMessage,
 };
 
 export default handlerMappings;

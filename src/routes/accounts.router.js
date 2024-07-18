@@ -9,25 +9,20 @@ const regex = /^[A-Za-z0-9]*$/;
 /** 사용자 회원가입 API **/
 router.post('/sign-up', async (req, res, next) => {
   try {
-    const { loginId, password } = req.body;
+    const { username, password } = req.body;
     const accounts = await getAccounts();
-    const isExistUser = accounts.find((account) => account.id == loginId);
+    const isExistUser = accounts.find((account) => account.id == username);
 
-    if (isExistUser)
-      return res.status(409).json({ message: '이미 존재하는 ID입니다.' });
-    else if (!regex.test(loginId))
-      return res
-        .status(400)
-        .json({ message: 'ID는 영어와 숫자만 사용할 수 있습니다.' });
+    if (isExistUser) return res.status(409).json({ message: '이미 존재하는 ID입니다.' });
+    else if (!regex.test(username))
+      return res.status(400).json({ message: 'ID는 영어와 숫자만 사용할 수 있습니다.' });
     else if (password.length < 6)
-      return res
-        .status(400)
-        .json({ message: '비밀번호는 6자 이상이어야 합니다.' });
+      return res.status(400).json({ message: '비밀번호는 6자 이상이어야 합니다.' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // DB 저장부
-    await addAccount({ id: loginId, password: hashedPassword });
+    await addAccount({ id: username, password: hashedPassword });
 
     return res.status(201).json({ message: '회원가입이 완료되었습니다.' });
   } catch (error) {
@@ -38,13 +33,12 @@ router.post('/sign-up', async (req, res, next) => {
 /** 사용자 로그인 API **/
 router.post('/sign-in', async (req, res, next) => {
   try {
-    const { loginId, password } = req.body;
+    const { username, password } = req.body;
     // DB 호출부
     const accounts = await getAccounts();
-    const account = accounts.find((account) => account.id == loginId);
+    const account = accounts.find((account) => account.id == username);
 
-    if (!account)
-      return res.status(401).json({ message: '존재하지 않는 ID입니다.' });
+    if (!account) return res.status(401).json({ message: '존재하지 않는 ID입니다.' });
     else if (!(await bcrypt.compare(password, account.password)))
       return res.status(401).json({ message: '비밀번호가 일치하지 않습니다.' });
 

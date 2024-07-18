@@ -1,11 +1,26 @@
 import { CLIENT_VERSION } from '../constants.js';
-import { getGameAssets } from '../init/assets.js';
-import { getUserData } from '../models/user-data.model.js';
+import { getGameAssets } from '../session/assets.session.js';
+import { createHistory } from '../models/history.model.js';
 import { getUsers, removeUser } from '../models/user.model.js';
+import { gameSessions } from '../session/session.js';
 import handlerMappings from './handlerMapping.js';
 
-export const handleDisconnect = async (socket, uuid) => {
+export const handleDisconnect = async (socket, userID, io) => {
+  const myUser = gameSessions.findIndex((user) => user.id === userID);
+  const opponentUser = gameSessions.findIndex((user) => user.id !== userID);
+
+  gameSessions.splice(myUser, 1);
+
+  if (gameSessions.length > 0) {
+    io.to('gameSession').emit('gameOver', {
+      status: 'success',
+      message: '당신이 이겼습니다!',
+      data: { isWin: true },
+    });
+  }
+
   await removeUser(socket.id);
+
   console.log(`사용자 접속 해제: ${socket.id}`);
   console.log('현재 접속 중인 사용자:', await getUsers());
 };
@@ -16,14 +31,12 @@ export const handleConnection = async (socket, userUUID) => {
   );
   console.log('현재 접속 중인 사용자:', await getUsers());
 
-  const { monster, commonData } = getGameAssets();
-  const userData = await getUserData(userUUID);
+  const gameAssets = getGameAssets();
 
   socket.emit('connection', {
-    uuid: userUUID,
-    monster: monster[0],
-    commonData,
-    userHighScore: userData.user_high_score,
+    status: 'success',
+    message: '서버에 성공적으로 연결되었습니다.',
+    data: { gameAssets },
   });
 };
 
@@ -45,24 +58,5 @@ export const handleEvent = async (io, socket, data) => {
     return;
   }
 
-  const response = await handler(data.userId, data.payload);
-  if (response.broadcast) {
-    io.emit('response', response.broadcast);
-  }
-
-  if (response.refundTower) {
-    socket.emit('refundTower', response);
-    return;
-  }
-
-  if (response.towerIdx || response.towerIdx === 0) {
-    socket.emit('upgradeTower', response);
-    return;
-  }
-
-  if (response.data) {
-    socket.emit('dataSync', response);
-  }
-
-  socket.emit('response', response);
+  await handler(data.userId, data.payload, socket, io);
 };

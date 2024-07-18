@@ -15,17 +15,20 @@ export class Base {
       this.x - this.width,
       this.y - this.height / 2,
       this.width,
-      this.height
+      this.height,
     );
 
     if (!isOpponent) {
-      ctx.font = "16px Arial";
-      ctx.fillStyle = "white";
+      ctx.font = '16px Arial';
+      ctx.fillStyle = 'white';
       ctx.fillText(
         `HP: ${this.hp}/${this.maxHp}`,
         this.x - this.width,
-        this.y - this.height / 2 - 10
+        this.y - this.height / 2 - 10,
       );
     }
+  }
+  changeHp(hp) {
+    this.hp = hp;
   }
 }

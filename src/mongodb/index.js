@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 const connect = () => {
   mongoose
     .connect(process.env.DB_URI, {
-      dbName: 'Pentagon_Tower_Defense_Private',
+      dbName: 'One_Punch_Tower_Defense',
     })
     .then(() => console.log('MongoDB 연결에 성공하였습니다.'))
     .catch((err) => console.log(`MongoDB 연결에 실패하였습니다. ${err}`));

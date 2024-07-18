@@ -1,0 +1,26 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model accounts {
+  id        String    @id @unique(map: "id_UNIQUE") @db.VarChar(255)
+  password  String    @db.VarChar(255)
+  createAt DateTime? @default(now()) @db.DateTime(0) @map("create_at")
+  updateAt DateTime? @default(now()) @db.DateTime(0) @map("update_at")
+}
+
+model match_history {
+  id           Int       @id @unique(map: "id_UNIQUE") @default(autoincrement())
+  userIdA      String?   @map("user_id_a") @db.VarChar(255)
+  scoreA       Int?      @map("score_a")
+  userIdB      String?   @map("user_id_b") @db.VarChar(255)
+  scoreB       Int?      @map("score_b")
+  userIdWinner String?   @map("user_id_winner") @db.VarChar(255)
+  createdAt    DateTime? @default(now()) @map("created_at") @db.DateTime(0)
+}

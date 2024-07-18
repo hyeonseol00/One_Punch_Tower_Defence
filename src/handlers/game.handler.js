@@ -1,19 +1,42 @@
-import { getGameAssets } from '../init/assets.js';
+import User from '../classes/models/user.class.js';
 import { getHighScore, updateHighScore } from '../models/high-score.model.js';
 import { getUserData, updateUserData } from '../models/user-data.model.js';
+import { addQueue, getGameSession } from '../session/game.session.js';
 
-export const gameStart = (userId, payload) => {
-  return { status: 'success', message: '게임이 정상적으로 실행되었습니다.' };
+export const gameMatch = async (userId, io, socket) => {
+  const userData = await getUserData(userId);
+  const { score, user_high_score: highScore } = userData;
+
+  const user = new User(userId, score, highScore);
+
+  userData.tower_coordinates = user.towerCoords;
+  userData.tower_is_upgrades = user.towerIsUpgrades;
+  updateUserData(userData);
+
+  addQueue(user);
+  socket.join('gameSession');
+
+  const gameSession = getGameSession();
+  if (gameSession.length > 1) {
+    io.emit('matchFound', {
+      status: 'success',
+      message: '매칭이 성사되었습니다, 게임이 3초 뒤 시작됩니다!',
+      data: { gameSession },
+    });
+  }
 };
 
-export const gameEnd = async (userId, payload) => {
+export const gameEnd = async (userId, payload, socket, io) => {
   const userData = await getUserData(userId);
 
-  if (Math.abs(userData.score - payload.score) >= 200)
-    return { status: 'fail', message: '점수 데이터가 잘못되었습니다!' };
+  if (Math.abs(userData.score - payload.score) >= 200) {
+    socket.emit('response', { status: 'fail', message: '점수 데이터가 잘못되었습니다!' });
+    return;
+  }
 
-  if (userData.user_high_score < payload.score)
+  if (userData.user_high_score < payload.score) {
     userData.user_high_score = payload.score;
+  }
 
   await updateUserData(userData);
 
@@ -21,16 +44,13 @@ export const gameEnd = async (userId, payload) => {
 
   if (highScore < payload.score) {
     await updateHighScore(payload.score);
-    return {
+    io.emit('response', {
       status: 'success',
       message: '게임 종료, 최고기록이 갱신되었습니다!',
-      broadcast: {
-        message: '서버 최고기록이 갱신되었습니다!',
-        userId,
-        highscore: payload.score,
-      },
-    };
+      data: { userId, highscore: payload.score },
+    });
+    return;
   }
 
-  return { status: 'success', message: '게임 종료!', data: userData };
+  socket.emit('response', { status: 'success', message: '게임 종료!', data: userData });
 };

@@ -15,16 +15,12 @@ const server = createServer(app);
 
 const PORT = 3000;
 
-app.use(express.static('tower_defense_client'));
+app.use(express.static('tower_defense_client_online'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use('/api', accountsRouter);
 app.use(errorHandlingMiddleware);
 initSocket(server);
-
-app.get('/', (req, res) => {
-  res.send('<h1>Hello World</h1>');
-});
 
 server.listen(PORT, async () => {
   console.log(`서버가 ${PORT}번 포트로 실행 성공했습니다.`);
