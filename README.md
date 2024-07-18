@@ -46,7 +46,7 @@
 ## 📃 ERD Diagram
 
 ### **MySQL**
-![MySQL](https://github.com/user-attachments/assets/ec7d872a-9126-4780-af2c-a48bcab09ebb)
+![Untitled](https://github.com/user-attachments/assets/a92dcbb9-80f2-43d3-863a-72ce5b1f3d43)
 
 ### **MongoDB**
 ![mongoDB](https://github.com/user-attachments/assets/01a93e48-9e87-49de-8ddc-96e19e8d6b94)
